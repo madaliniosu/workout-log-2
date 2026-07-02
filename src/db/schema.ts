@@ -197,3 +197,32 @@ export const loggedSets = pgTable(
     ),
   ]
 );
+
+
+// ---------------------------------------------------------------------------
+// userExercises
+// ---------------------------------------------------------------------------
+// Tracks which library exercises (exercises.userId IS NULL) a user has
+// explicitly added to their personal working set, via "Add exercise from
+// library." Custom exercises don't need a row here — ownership via
+// exercises.userId already makes those personal. This is a deliberate 6th
+// table: "which library exercises does this user actually use" isn't usage
+// history (you can add one before ever logging it) and isn't ownership
+// (library exercises belong to no one) — it needed its own table.
+export const userExercises = pgTable(
+  "user_exercises",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    exerciseId: uuid("exercise_id")
+      .notNull()
+      .references(() => exercises.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("user_exercises_user_exercise_unique").on(table.userId, table.exerciseId),
+    index("user_exercises_user_id_idx").on(table.userId),
+  ]
+);

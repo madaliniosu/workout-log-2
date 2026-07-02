@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getWorkoutById, getWorkoutExercises } from "@/db/queries/workouts";
-import { logWorkoutSetsAction } from "@/actions/set-actions";
-import { SetRow } from "@/components/set-row";
 
-export default async function LogWorkoutPage({
+export default async function WorkoutDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -20,36 +18,28 @@ export default async function LogWorkoutPage({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <Link href="/" className="text-sm text-zinc-500 hover:underline">
-        ← Back
+      <Link href="/activity" className="text-sm text-zinc-500 hover:underline">
+        ← Back to activity
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold">Log: {workout.name}</h1>
+      <h1 className="mt-4 text-2xl font-semibold">{workout.name}</h1>
+      {workout.notes && <p className="mt-1 text-sm text-zinc-500">{workout.notes}</p>}
 
-      <form action={logWorkoutSetsAction.bind(null, workout.id)} className="mt-6 flex flex-col gap-8">
+      <Link
+        href={`/log/workout/${workout.id}`}
+        className="mt-4 inline-block border rounded px-3 py-2 text-sm"
+      >
+        Log this workout
+      </Link>
+
+      <ol className="mt-6 divide-y">
         {slots.map((slot) => (
-          <div key={slot.id}>
-            <h2 className="text-lg font-medium">{slot.exercise.name}</h2>
-            <div className="mt-2 flex flex-col gap-4">
-              {Array.from({ length: slot.targetSets }, (_, i) => (
-                <SetRow
-                  key={i}
-                  exerciseId={slot.exercise.id}
-                  setNumber={i + 1}
-                  plannedReps={slot.exercise.targetReps}
-                  plannedWeightKg={slot.exercise.targetWeightKg}
-                  plannedDurationSeconds={slot.exercise.targetDurationSeconds}
-                  plannedDistanceMeters={slot.exercise.targetDistanceMeters}
-                />
-              ))}
-            </div>
-          </div>
+          <li key={slot.id} className="flex justify-between py-3">
+            <span>{slot.exercise.name}</span>
+            <span className="text-zinc-500">{slot.targetSets} sets</span>
+          </li>
         ))}
-
-        <button type="submit" className="border rounded px-3 py-2 self-start">
-          Save
-        </button>
-      </form>
+      </ol>
     </main>
   );
 }

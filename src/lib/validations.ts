@@ -8,12 +8,12 @@ const optionalText = z.preprocess(
   z.string().trim().optional()
 );
 
-const optionalNonNegativeInt = z.preprocess(
+export const optionalNonNegativeInt = z.preprocess(
   (value) => (value === "" ? undefined : value),
   z.coerce.number().int().min(0).optional()
 );
 
-const optionalNonNegativeNumber = z.preprocess(
+export const optionalNonNegativeNumber = z.preprocess(
   (value) => (value === "" ? undefined : value),
   z.coerce.number().min(0).optional()
 );
@@ -43,3 +43,22 @@ export const exerciseTargetsSchema = z.object({
 });
 
 export type ExerciseTargetsInput = z.infer<typeof exerciseTargetsSchema>;
+
+
+// One row of the ad-hoc/workout logging form. Mirrors logged_sets' own
+// columns exactly — every metric optional except setNumber, since not every
+// exercise uses every metric (reps/weight for lifts, duration/distance for
+// cardio, etc).
+export const logSetRowSchema = z.object({
+  setNumber: z.coerce.number().int().min(1),
+  plannedReps: optionalNonNegativeInt,
+  reps: optionalNonNegativeInt,
+  plannedWeightKg: optionalNonNegativeNumber,
+  weightKg: optionalNonNegativeNumber,
+  plannedDurationSeconds: optionalNonNegativeInt,
+  durationSeconds: optionalNonNegativeInt,
+  plannedDistanceMeters: optionalNonNegativeNumber,
+  distanceMeters: optionalNonNegativeNumber,
+});
+
+export type LogSetRowInput = z.infer<typeof logSetRowSchema>;

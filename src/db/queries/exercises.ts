@@ -10,6 +10,7 @@ export type ExerciseFilters = {
   targetMuscle?: string;
 };
 
+
 // Built-in library only (userId IS NULL). Custom exercises get their own
 // getCustomExercises() when that feature lands in Stage 3 — kept separate
 // rather than merged here so each stage only builds what it needs.
@@ -26,12 +27,14 @@ export async function getExerciseLibrary(filters: ExerciseFilters = {}) {
     .orderBy(asc(exercises.name));
 }
 
+
 // Works for both library and (later) custom exercises — the detail page
 // doesn't need to know which kind it's looking at.
 export async function getExerciseById(id: string) {
   const [exercise] = await db.select().from(exercises).where(eq(exercises.id, id));
   return exercise ?? null;
 }
+
 
 // Distinct values for the browse page's filter dropdowns. Derived from the
 // data itself rather than a lookup table, per the schema's decision to keep
@@ -51,6 +54,17 @@ export async function getExerciseFilterOptions() {
 }
 
 
+// Custom exercises only (userId set to a specific user) — the counterpart
+// to getExerciseLibrary(), which only returns userId IS NULL rows.
+export async function getCustomExercises(userId: string) {
+  return db
+    .select()
+    .from(exercises)
+    .where(eq(exercises.userId, userId))
+    .orderBy(asc(exercises.name));
+}
+
+
 // userId is required here (unlike getExerciseById) — this is specifically
 // the write path that creates a *custom* exercise, so the caller must have
 // already resolved a real user id via getCurrentUserId().
@@ -61,6 +75,7 @@ export async function createCustomExercise(userId: string, data: CreateExerciseI
     .returning();
   return exercise;
 }
+
 
 // Works on library exercises too: targets are a personal goal layered on
 // top of any exercise, not a property only custom exercises can have.

@@ -3,9 +3,13 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createExerciseSchema, exerciseTargetsSchema } from "@/lib/validations";
-import { createCustomExercise, updateExerciseTargets } from "@/db/queries/exercises";
+import { createCustomExercise, updateExerciseTargets, addExerciseToUser } from "@/db/queries/exercises";
 import { getCurrentUserId } from "@/lib/current-user";
 
+// Redirects to /activity, not /exercises/[id] — this is now triggered from
+// the "Add exercise" modal on Activity, so closing it back onto the page it
+// was opened from (with the new exercise now visible in the list) is the
+// right result, not a detail-page navigation.
 export async function createExerciseAction(formData: FormData) {
   const parsed = createExerciseSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -13,10 +17,10 @@ export async function createExerciseAction(formData: FormData) {
   }
 
   const userId = await getCurrentUserId();
-  const exercise = await createCustomExercise(userId, parsed.data);
+  await createCustomExercise(userId, parsed.data);
 
-  revalidatePath("/exercises");
-  redirect(`/exercises/${exercise.id}`);
+  revalidatePath("/activity");
+  redirect("/activity");
 }
 
 // Bound to a specific exerciseId via .bind(null, exercise.id) where the
@@ -29,4 +33,13 @@ export async function updateExerciseTargetsAction(exerciseId: string, formData: 
 
   await updateExerciseTargets(exerciseId, parsed.data);
   revalidatePath(`/exercises/${exerciseId}`);
+}
+
+// Triggered per-row from the "Add exercise from library" modal — each row
+// is its own tiny form bound to that exercise's id.
+export async function addExerciseToLibraryAction(exerciseId: string) {
+  const userId = await getCurrentUserId();
+  await addExerciseToUser(userId, exerciseId);
+
+  revalidatePath("/activity");
 }

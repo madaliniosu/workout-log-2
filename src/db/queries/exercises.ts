@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { exercises } from "@/db/schema";
+import { exercises, userExercises } from "@/db/schema";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { CreateExerciseInput, ExerciseTargetsInput } from "@/lib/validations";
 
@@ -86,4 +86,30 @@ export async function updateExerciseTargets(id: string, targets: ExerciseTargets
     .where(eq(exercises.id, id))
     .returning();
   return exercise;
+}
+
+
+// A user's personal working set: their own custom exercises, plus any
+// library exercises they've explicitly added via userExercises. This is
+// what Activity's Exercises section shows — never the raw 1,324-row
+// library, which only appears inside the "Add from library" picker.
+export async function getUserExercises(userId: string) {
+  const [custom, addedLibrary] = await Promise.all([
+    db.select().from(exercises).where(eq(exercises.userId, userId)),
+    db
+      .select({ exercise: exercises })
+      .from(userExercises)
+      .innerJoin(exercises, eq(userExercises.exerciseId, exercises.id))
+      .where(eq(userExercises.userId, userId)),
+  ]);
+
+  return [...custom, ...addedLibrary.map((row) => row.exercise)].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+}
+
+// Idempotent by design: the unique(userId, exerciseId) constraint means a
+// second "add" of the same exercise is a silent no-op, not an error.
+export async function addExerciseToUser(userId: string, exerciseId: string) {
+  await db.insert(userExercises).values({ userId, exerciseId }).onConflictDoNothing();
 }

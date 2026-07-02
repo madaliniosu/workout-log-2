@@ -3,7 +3,7 @@ import { z } from "zod";
 // Server Actions receive FormData, where every field is a string and an
 // empty input arrives as "" rather than being omitted — so "optional" has
 // to be taught to treat "" as "not provided" before the real validation runs.
-const optionalText = z.preprocess(
+export const optionalText = z.preprocess(
   (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
   z.string().trim().optional()
 );
@@ -62,3 +62,18 @@ export const logSetRowSchema = z.object({
 });
 
 export type LogSetRowInput = z.infer<typeof logSetRowSchema>;
+
+
+export const createWorkoutSlotSchema = z.object({
+  exerciseId: z.string().uuid(),
+  targetSets: z.coerce.number().int().min(1),
+});
+
+export type CreateWorkoutSlotInput = z.infer<typeof createWorkoutSlotSchema>;
+
+export const createWorkoutSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  notes: optionalText,
+});
+
+export type CreateWorkoutInput = z.infer<typeof createWorkoutSchema>;

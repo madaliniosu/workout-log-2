@@ -1,6 +1,8 @@
 import { db } from "@/db/client";
 import { exercises } from "@/db/schema";
 import { and, asc, eq, isNull } from "drizzle-orm";
+import type { CreateExerciseInput, ExerciseTargetsInput } from "@/lib/validations";
+
 
 export type ExerciseFilters = {
   category?: string;
@@ -46,4 +48,27 @@ export async function getExerciseFilterOptions() {
     equipmentTypes: equipmentTypes.map((e) => e.value).filter((v): v is string => Boolean(v)),
     targetMuscles: targetMuscles.map((t) => t.value).filter((v): v is string => Boolean(v)),
   };
+}
+
+
+// userId is required here (unlike getExerciseById) — this is specifically
+// the write path that creates a *custom* exercise, so the caller must have
+// already resolved a real user id via getCurrentUserId().
+export async function createCustomExercise(userId: string, data: CreateExerciseInput) {
+  const [exercise] = await db
+    .insert(exercises)
+    .values({ userId, ...data })
+    .returning();
+  return exercise;
+}
+
+// Works on library exercises too: targets are a personal goal layered on
+// top of any exercise, not a property only custom exercises can have.
+export async function updateExerciseTargets(id: string, targets: ExerciseTargetsInput) {
+  const [exercise] = await db
+    .update(exercises)
+    .set(targets)
+    .where(eq(exercises.id, id))
+    .returning();
+  return exercise;
 }

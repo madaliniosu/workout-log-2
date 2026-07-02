@@ -1,4 +1,5 @@
 type SetRowProps = {
+  exerciseId: string;
   setNumber: number;
   plannedReps?: number | null;
   plannedWeightKg?: number | null;
@@ -11,6 +12,7 @@ type SetRowProps = {
 // set is performed) — for every metric. All fields share names across every
 // row instance so the Server Action can group them back with getAll().
 export function SetRow({
+  exerciseId,
   setNumber,
   plannedReps,
   plannedWeightKg,
@@ -20,6 +22,7 @@ export function SetRow({
   return (
     <fieldset className="border rounded p-4">
       <legend className="px-1 text-sm font-medium">Set {setNumber}</legend>
+      <input type="hidden" name="exerciseId" value={exerciseId} />
       <input type="hidden" name="setNumber" value={setNumber} />
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">

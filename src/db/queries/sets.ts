@@ -14,29 +14,28 @@ export type LogSetInput = {
   distanceMeters?: number;
 };
 
-// One session_id and one performed_at generated here, once per save, and
-// stamped on every row — this is the entire "session" concept (see
-// schema.ts: there is no sessions table, just this shared token).
+// One session_id and one performed_at generated here, once per save, shared
+// across every exercise in the save — this is what makes "log a whole
+// workout" and "log one exercise" the same operation at the data layer: the
+// only difference is how many entries are in exerciseSets.
 export async function logSets(params: {
   userId: string;
-  exerciseId: string;
   workoutId: string | null;
-  sets: LogSetInput[];
+  exerciseSets: { exerciseId: string; sets: LogSetInput[] }[];
 }) {
   const sessionId = randomUUID();
   const performedAt = new Date();
 
-  return db
-    .insert(loggedSets)
-    .values(
-      params.sets.map((set) => ({
-        ...set,
-        sessionId,
-        performedAt,
-        userId: params.userId,
-        exerciseId: params.exerciseId,
-        workoutId: params.workoutId,
-      }))
-    )
-    .returning();
+  const rows = params.exerciseSets.flatMap(({ exerciseId, sets }) =>
+    sets.map((set) => ({
+      ...set,
+      sessionId,
+      performedAt,
+      userId: params.userId,
+      exerciseId,
+      workoutId: params.workoutId,
+    }))
+  );
+
+  return db.insert(loggedSets).values(rows).returning();
 }

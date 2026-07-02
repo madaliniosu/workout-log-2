@@ -1,7 +1,7 @@
 import { getExerciseLibrary, getCustomExercises } from "@/db/queries/exercises";
 import { getCurrentUserId } from "@/lib/current-user";
 import { createWorkoutAction } from "@/actions/workout-actions";
-import { WorkoutExerciseBuilder } from "@/components/workout-exercise-builder";
+import { ExerciseListBuilder } from "@/components/exercise-list-builder";
 
 export default async function NewWorkoutPage() {
   const userId = await getCurrentUserId();
@@ -28,7 +28,7 @@ export default async function NewWorkoutPage() {
           <textarea name="notes" rows={3} className="border rounded px-2 py-1" />
         </label>
 
-        <WorkoutExerciseBuilder exercises={exercises} />
+        <ExerciseListBuilder countFieldName="targetSets" exercises={exercises} />
 
         <button type="submit" className="mt-2 border rounded px-3 py-2 self-start">
           Create workout

@@ -8,15 +8,30 @@ type Card = {
   key: string;
   exerciseId: string;
   exerciseName: string;
-  targetSets: number;
+  count: number;
 };
 
-function createCard(): Card {
-  return { key: crypto.randomUUID(), exerciseId: "", exerciseName: "", targetSets: 3 };
+function createCard(initialCount: number): Card {
+  return { key: crypto.randomUUID(), exerciseId: "", exerciseName: "", count: initialCount };
 }
 
-export function WorkoutExerciseBuilder({ exercises }: { exercises: ExerciseOption[] }) {
-  const [cards, setCards] = useState<Card[]>([createCard()]);
+// Reused in two contexts: picking exercises + target set counts when
+// building a workout template, and picking exercises + set counts when
+// logging ad-hoc. countFieldName lets each caller control what the count
+// input is actually named in the submitted form, without this component
+// needing to know which Server Action will receive it.
+export function ExerciseListBuilder({
+  exercises,
+  countFieldName,
+  countLabel = "Sets",
+  initialCount = 3,
+}: {
+  exercises: ExerciseOption[];
+  countFieldName: string;
+  countLabel?: string;
+  initialCount?: number;
+}) {
+  const [cards, setCards] = useState<Card[]>([createCard(initialCount)]);
 
   function updateCard(key: string, changes: Partial<Card>) {
     setCards((prev) => prev.map((card) => (card.key === key ? { ...card, ...changes } : card)));
@@ -43,8 +58,10 @@ export function WorkoutExerciseBuilder({ exercises }: { exercises: ExerciseOptio
             />
 
             <SetsStepper
-              value={card.targetSets}
-              onChange={(targetSets) => updateCard(card.key, { targetSets })}
+              name={countFieldName}
+              label={countLabel}
+              value={card.count}
+              onChange={(count) => updateCard(card.key, { count })}
             />
 
             <button
@@ -61,7 +78,7 @@ export function WorkoutExerciseBuilder({ exercises }: { exercises: ExerciseOptio
 
       <button
         type="button"
-        onClick={() => setCards((prev) => [...prev, createCard()])}
+        onClick={() => setCards((prev) => [...prev, createCard(initialCount)])}
         className="self-start border rounded px-3 py-2 text-sm"
       >
         + Add exercise
@@ -92,8 +109,6 @@ function ExerciseCombobox({
   return (
     <div className="relative flex flex-col gap-1">
       <span className="text-xs text-zinc-500">Exercise</span>
-      {/* The hidden input is what actually gets submitted with the form —
-          the visible text input is just for searching/display. */}
       <input type="hidden" name="exerciseId" value={value} required />
       <input
         type="text"
@@ -133,10 +148,20 @@ function ExerciseCombobox({
   );
 }
 
-function SetsStepper({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+function SetsStepper({
+  name,
+  label,
+  value,
+  onChange,
+}: {
+  name: string;
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-zinc-500">Sets</span>
+      <span className="text-xs text-zinc-500">{label}</span>
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -145,7 +170,7 @@ function SetsStepper({ value, onChange }: { value: number; onChange: (value: num
         >
           −
         </button>
-        <input type="hidden" name="targetSets" value={value} />
+        <input type="hidden" name={name} value={value} />
         <span className="w-6 text-center">{value}</span>
         <button
           type="button"

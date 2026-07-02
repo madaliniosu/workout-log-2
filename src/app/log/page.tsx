@@ -4,21 +4,37 @@ import { getExerciseById } from "@/db/queries/exercises";
 import { logSetsAction } from "@/actions/set-actions";
 import { SetRow } from "@/components/set-row";
 
+// searchParams gives a plain string when a key appears once, and a string[]
+// when it appears more than once — normalize both to an array so exerciseId
+// and sets can always be paired up by index regardless of how many exercises
+// were picked.
+function toArray(value: string | string[] | undefined): string[] {
+  if (value === undefined) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
 export default async function LogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ exerciseId?: string; sets?: string }>;
+  searchParams: Promise<{ exerciseId?: string | string[]; sets?: string | string[] }>;
 }) {
-  const { exerciseId, sets } = await searchParams;
-  const setCount = Number(sets);
+  const params = await searchParams;
+  const exerciseIds = toArray(params.exerciseId);
+  const setCounts = toArray(params.sets).map(Number);
 
-  if (!exerciseId || !Number.isInteger(setCount) || setCount < 1) {
+  if (
+    exerciseIds.length === 0 ||
+    exerciseIds.length !== setCounts.length ||
+    setCounts.some((count) => !Number.isInteger(count) || count < 1)
+  ) {
     notFound();
   }
 
-  const exercise = await getExerciseById(exerciseId);
-  if (!exercise) {
-    notFound();
+  const maybeExercises = await Promise.all(exerciseIds.map((id) => getExerciseById(id)));
+  const exercises: NonNullable<(typeof maybeExercises)[number]>[] = [];
+  for (const exercise of maybeExercises) {
+    if (!exercise) notFound();
+    exercises.push(exercise);
   }
 
   return (
@@ -27,22 +43,29 @@ export default async function LogPage({
         ← Back
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold">Log: {exercise.name}</h1>
-      <p className="mt-1 text-sm text-zinc-500">{setCount} sets</p>
+      <h1 className="mt-4 text-2xl font-semibold">Log sets</h1>
 
-      <form action={logSetsAction.bind(null, exercise.id)} className="mt-6 flex flex-col gap-4">
-        {Array.from({ length: setCount }, (_, i) => (
-          <SetRow
-            key={i}
-            setNumber={i + 1}
-            plannedReps={exercise.targetReps}
-            plannedWeightKg={exercise.targetWeightKg}
-            plannedDurationSeconds={exercise.targetDurationSeconds}
-            plannedDistanceMeters={exercise.targetDistanceMeters}
-          />
+      <form action={logSetsAction} className="mt-6 flex flex-col gap-8">
+        {exercises.map((exercise, exerciseIndex) => (
+          <div key={exercise.id}>
+            <h2 className="text-lg font-medium">{exercise.name}</h2>
+            <div className="mt-2 flex flex-col gap-4">
+              {Array.from({ length: setCounts[exerciseIndex] }, (_, i) => (
+                <SetRow
+                  key={i}
+                  exerciseId={exercise.id}
+                  setNumber={i + 1}
+                  plannedReps={exercise.targetReps}
+                  plannedWeightKg={exercise.targetWeightKg}
+                  plannedDurationSeconds={exercise.targetDurationSeconds}
+                  plannedDistanceMeters={exercise.targetDistanceMeters}
+                />
+              ))}
+            </div>
+          </div>
         ))}
 
-        <button type="submit" className="mt-2 border rounded px-3 py-2 self-start">
+        <button type="submit" className="border rounded px-3 py-2 self-start">
           Save
         </button>
       </form>

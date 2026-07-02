@@ -45,11 +45,8 @@ export const exerciseTargetsSchema = z.object({
 export type ExerciseTargetsInput = z.infer<typeof exerciseTargetsSchema>;
 
 
-// One row of the ad-hoc/workout logging form. Mirrors logged_sets' own
-// columns exactly — every metric optional except setNumber, since not every
-// exercise uses every metric (reps/weight for lifts, duration/distance for
-// cardio, etc).
 export const logSetRowSchema = z.object({
+  exerciseId: z.string().uuid(),
   setNumber: z.coerce.number().int().min(1),
   plannedReps: optionalNonNegativeInt,
   reps: optionalNonNegativeInt,
@@ -62,7 +59,6 @@ export const logSetRowSchema = z.object({
 });
 
 export type LogSetRowInput = z.infer<typeof logSetRowSchema>;
-
 
 export const createWorkoutSlotSchema = z.object({
   exerciseId: z.string().uuid(),

@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createExerciseSchema, exerciseTargetsSchema } from "@/lib/validations";
-import { createCustomExercise, updateExerciseTargets, addExerciseToUser } from "@/db/queries/exercises";
+import { createCustomExercise, updateExerciseTargets, addExerciseToUser, deleteCustomExercise, removeExerciseFromUser } from "@/db/queries/exercises";
 import { getCurrentUserId } from "@/lib/current-user";
 
 // Redirects to /activity, not /exercises/[id] — this is now triggered from
@@ -40,6 +40,20 @@ export async function updateExerciseTargetsAction(exerciseId: string, formData: 
 export async function addExerciseToLibraryAction(exerciseId: string) {
   const userId = await getCurrentUserId();
   await addExerciseToUser(userId, exerciseId);
+
+  revalidatePath("/activity");
+}
+
+// isCustom decides which delete path runs — see the two query functions for
+// why they're different operations, not just the same delete on two tables.
+export async function removeExerciseAction(exerciseId: string, isCustom: boolean) {
+  const userId = await getCurrentUserId();
+
+  if (isCustom) {
+    await deleteCustomExercise(userId, exerciseId);
+  } else {
+    await removeExerciseFromUser(userId, exerciseId);
+  }
 
   revalidatePath("/activity");
 }

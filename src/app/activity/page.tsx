@@ -4,6 +4,7 @@ import { getWorkouts } from "@/db/queries/workouts";
 import { getCurrentUserId } from "@/lib/current-user";
 import { AddCustomExerciseModal } from "@/components/add-custom-exercise-modal";
 import { AddFromLibraryModal } from "@/components/add-from-library-modal";
+import { removeExerciseAction } from "@/actions/exercise-actions";
 
 export default async function ActivityPage() {
   const userId = await getCurrentUserId();
@@ -49,11 +50,16 @@ export default async function ActivityPage() {
 
         <ul className="mt-2 divide-y">
           {userExercises.map((exercise) => (
-            <li key={exercise.id}>
-              <Link href={`/exercises/${exercise.id}`} className="flex justify-between py-3 hover:underline">
+            <li key={exercise.id} className="flex items-center justify-between py-3">
+              <Link href={`/exercises/${exercise.id}`} className="flex flex-1 justify-between hover:underline">
                 <span>{exercise.name}</span>
                 <span className="text-zinc-500">{exercise.category}</span>
               </Link>
+              <form action={removeExerciseAction.bind(null, exercise.id, exercise.userId !== null)} className="ml-4">
+                <button type="submit" className="text-sm text-red-600 hover:underline">
+                  Remove
+                </button>
+              </form>
             </li>
           ))}
         </ul>

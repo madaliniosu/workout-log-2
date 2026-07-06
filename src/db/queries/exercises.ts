@@ -115,3 +115,22 @@ export async function getUserExercises(userId: string) {
 export async function addExerciseToUser(userId: string, exerciseId: string) {
   await db.insert(userExercises).values({ userId, exerciseId }).onConflictDoNothing();
 }
+
+
+// Removes the bookmark, never the library exercise itself — that's shared,
+// global data owned by no one, and other users may have their own bookmark
+// on the same row.
+export async function removeExerciseFromUser(userId: string, exerciseId: string) {
+  await db
+    .delete(userExercises)
+    .where(and(eq(userExercises.userId, userId), eq(userExercises.exerciseId, exerciseId)));
+}
+
+// Deletes a custom exercise outright. Scoped to userId too, not just id, so
+// a user can only ever delete their own — the right invariant to encode now
+// even pre-auth. Will throw on a foreign key violation if the exercise has
+// ever been logged or used in a workout (workout_exercises/logged_sets are
+// RESTRICT on purpose), rather than silently deleting that history.
+export async function deleteCustomExercise(userId: string, exerciseId: string) {
+  await db.delete(exercises).where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)));
+}

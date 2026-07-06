@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getWorkoutById, getWorkoutExercises } from "@/db/queries/workouts";
-import { logWorkoutSetsAction } from "@/actions/set-actions";
+import { logSetsAction } from "@/actions/set-actions";
 import { SetRow } from "@/components/set-row";
 
 export default async function LogWorkoutPage({
@@ -26,7 +26,7 @@ export default async function LogWorkoutPage({
 
       <h1 className="mt-4 text-2xl font-semibold">Log: {workout.name}</h1>
 
-      <form action={logWorkoutSetsAction.bind(null, workout.id)} className="mt-6 flex flex-col gap-8">
+      <form action={logSetsAction} className="mt-6 flex flex-col gap-8">
         {slots.map((slot) => (
           <div key={slot.id}>
             <h2 className="text-lg font-medium">{slot.exercise.name}</h2>
@@ -35,6 +35,7 @@ export default async function LogWorkoutPage({
                 <SetRow
                   key={i}
                   exerciseId={slot.exercise.id}
+                  workoutId={workout.id}
                   setNumber={i + 1}
                   tracksReps={slot.exercise.tracksReps}
                   tracksWeight={slot.exercise.tracksWeight}
@@ -45,7 +46,6 @@ export default async function LogWorkoutPage({
                   plannedDurationSeconds={slot.exercise.targetDurationSeconds}
                   plannedDistanceMeters={slot.exercise.targetDistanceMeters}
                 />
-
               ))}
             </div>
           </div>

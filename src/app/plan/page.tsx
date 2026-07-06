@@ -10,7 +10,6 @@ import { NewExerciseModal } from "@/components/new-exercise-modal";
 import { EditExerciseModal } from "@/components/edit-exercise-modal";
 import { Tabs } from "@/components/tabs";
 import { getWorkouts, getWorkoutExercises } from "@/db/queries/workouts";
-import { removeExerciseAction } from "@/actions/exercise-actions";
 import { deleteWorkoutAction } from "@/actions/workout-actions";
 import { NewWorkoutModal } from "@/components/new-workout-modal";
 import { EditWorkoutModal } from "@/components/edit-workout-modal";
@@ -83,62 +82,45 @@ export default async function PlanPage() {
                                     </p>
 
                                     <ul className="mt-2 divide-y">
-                                        {userExercises.map((exercise) => (
+                                                                                {userExercises.map((exercise) => (
                                             <li
                                                 key={exercise.id}
                                                 className="flex items-center justify-between py-3"
                                             >
-                                                <Link
-                                                    href={`/exercises/${exercise.id}`}
-                                                    className="flex flex-1 justify-between hover:underline"
-                                                >
-                                                    <span>{exercise.name}</span>
-                                                    <span className="text-zinc-500">
-                                                        {exercise.category}
-                                                    </span>
-                                                </Link>
-                                                <div className="ml-4 flex items-center gap-3">
-                                                    <EditExerciseModal
-                                                        exerciseId={exercise.id}
-                                                        defaultValues={{
-                                                            name: exercise.name,
-                                                            category:
-                                                                exercise.category,
-                                                            equipment:
-                                                                exercise.equipment,
-                                                            muscleGroup:
-                                                                exercise.muscleGroup,
-                                                            targetMuscle:
-                                                                exercise.targetMuscle,
-                                                            instructions:
-                                                                exercise.instructions,
-                                                            tracksReps:
-                                                                exercise.tracksReps,
-                                                            tracksWeight:
-                                                                exercise.tracksWeight,
-                                                            tracksDuration:
-                                                                exercise.tracksDuration,
-                                                            tracksDistance:
-                                                                exercise.tracksDistance,
-                                                        }}
-                                                        filterOptions={
-                                                            filterOptions
-                                                        }
-                                                    />
-                                                    <form
-                                                        action={removeExerciseAction.bind(
-                                                            null,
-                                                            exercise.id,
-                                                        )}
-                                                    >
-                                                        <button
-                                                            type="submit"
-                                                            className="text-sm text-red-600 hover:underline"
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    </form>
-                                                </div>
+                                                <EditExerciseModal
+                                                    exerciseId={exercise.id}
+                                                    defaultValues={{
+                                                        name: exercise.name,
+                                                        category:
+                                                            exercise.category,
+                                                        equipment:
+                                                            exercise.equipment,
+                                                        muscleGroup:
+                                                            exercise.muscleGroup,
+                                                        targetMuscle:
+                                                            exercise.targetMuscle,
+                                                        instructions:
+                                                            exercise.instructions,
+                                                        tracksReps:
+                                                            exercise.tracksReps,
+                                                        tracksWeight:
+                                                            exercise.tracksWeight,
+                                                        tracksDuration:
+                                                            exercise.tracksDuration,
+                                                        tracksDistance:
+                                                            exercise.tracksDistance,
+                                                    }}
+                                                    filterOptions={filterOptions}
+                                                    trigger={
+                                                        <span className="flex flex-1 justify-between hover:underline">
+                                                            <span>{exercise.name}</span>
+                                                            <span className="text-zinc-500">
+                                                                {exercise.category}
+                                                            </span>
+                                                        </span>
+                                                    }
+                                                    triggerClassName="flex flex-1 text-left"
+                                                />
                                             </li>
                                         ))}
                                     </ul>
@@ -179,7 +161,7 @@ export default async function PlanPage() {
                                                     </div>
                                                     <div className="flex items-center gap-3">
                                                         <Link
-                                                            href={`/log/workout/${workout.id}`}
+                                                            href={`/log/${workout.id}`}
                                                             className="text-sm underline"
                                                         >
                                                             Log

@@ -1,5 +1,6 @@
 type SetRowProps = {
   exerciseId: string;
+  workoutId: string | null;
   setNumber: number;
   tracksReps: boolean;
   tracksWeight: boolean;
@@ -18,6 +19,7 @@ type SetRowProps = {
 // group them back with getAll().
 export function SetRow({
   exerciseId,
+  workoutId,
   setNumber,
   tracksReps,
   tracksWeight,
@@ -32,6 +34,7 @@ export function SetRow({
     <fieldset className="border rounded p-4">
       <legend className="px-1 text-sm font-medium">Set {setNumber}</legend>
       <input type="hidden" name="exerciseId" value={exerciseId} />
+      <input type="hidden" name="workoutId" value={workoutId ?? ""} />
       <input type="hidden" name="setNumber" value={setNumber} />
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">

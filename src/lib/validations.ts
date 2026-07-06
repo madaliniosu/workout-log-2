@@ -51,8 +51,14 @@ export const exerciseTargetsSchema = z.object({
 export type ExerciseTargetsInput = z.infer<typeof exerciseTargetsSchema>;
 
 
+export const nullableUuid = z.preprocess(
+    (value) => (value === "" ? null : value),
+    z.string().uuid().nullable(),
+);
+
 export const logSetRowSchema = z.object({
     exerciseId: z.string().uuid(),
+    workoutId: nullableUuid,
     setNumber: z.coerce.number().int().min(1),
     plannedReps: optionalNonNegativeInt,
     reps: optionalNonNegativeInt,

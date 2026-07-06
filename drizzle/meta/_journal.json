@@ -15,6 +15,20 @@
       "when": 1783004326344,
       "tag": "0001_calm_kate_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783008259971,
+      "tag": "0002_cheerful_serpent_society",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783332469039,
+      "tag": "0003_regular_siren",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@/db/client";
 import { loggedSets } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 export type LogSetInput = {
   setNumber: number;
@@ -38,4 +39,20 @@ export async function logSets(params: {
   );
 
   return db.insert(loggedSets).values(rows).returning();
+}
+
+// Distinct exercise ids, most-recently-logged first — powers the "Recent"
+// section in the Add Exercise modal. Grouped/aggregated in Postgres rather
+// than fetched raw and deduped in JS, since logged_sets can have many rows
+// per exercise per visit.
+export async function getRecentlyLoggedExerciseIds(userId: string, limit: number) {
+  const rows = await db
+    .select({ exerciseId: loggedSets.exerciseId })
+    .from(loggedSets)
+    .where(eq(loggedSets.userId, userId))
+    .groupBy(loggedSets.exerciseId)
+    .orderBy(sql`max(${loggedSets.performedAt}) desc`)
+    .limit(limit);
+
+  return rows.map((row) => row.exerciseId);
 }

@@ -16,8 +16,9 @@ export function Modal({
   triggerLabel: string;
   triggerClassName?: string;
   title: string;
-  children: (close: () => void) => ReactNode;
+  children: ReactNode;
 }) {
+
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   function open() {
@@ -53,7 +54,7 @@ export function Modal({
               <X size={20} />
             </button>
           </div>
-          <div className="max-h-[70vh] overflow-y-auto p-4">{children(close)}</div>
+            <div className="max-h-[70vh] overflow-y-auto p-4">{children}</div>
         </div>
       </dialog>
     </>

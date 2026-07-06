@@ -16,23 +16,24 @@ function createCard(initialCount: number): Card {
   return { key: crypto.randomUUID(), exerciseId: "", exerciseName: "", count: initialCount };
 }
 
-// Reused in two contexts: picking exercises + target set counts when
-// building a workout template, and picking exercises + set counts when
-// logging ad-hoc. countFieldName lets each caller control what the count
-// input is actually named in the submitted form, without this component
-// needing to know which Server Action will receive it.
 export function ExerciseListBuilder({
   exercises,
   countFieldName,
   countLabel = "Sets",
   initialCount = 3,
+  initialCards,
 }: {
   exercises: ExerciseOption[];
   countFieldName: string;
   countLabel?: string;
   initialCount?: number;
+  initialCards?: { exerciseId: string; exerciseName: string; count: number }[];
 }) {
-  const [cards, setCards] = useState<Card[]>([createCard(initialCount)]);
+  const [cards, setCards] = useState<Card[]>(() =>
+    initialCards && initialCards.length > 0
+      ? initialCards.map((card) => ({ key: crypto.randomUUID(), ...card }))
+      : [createCard(initialCount)]
+  );
 
   function updateCard(key: string, changes: Partial<Card>) {
     setCards((prev) => prev.map((card) => (card.key === key ? { ...card, ...changes } : card)));

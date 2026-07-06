@@ -3,13 +3,15 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createExerciseSchema, exerciseTargetsSchema } from "@/lib/validations";
-import { createCustomExercise, updateExerciseTargets, addExerciseToUser } from "@/db/queries/exercises";
+import { createCustomExercise, updateCustomExercise, updateExerciseTargets, deleteCustomExercise } from "@/db/queries/exercises";
 import { getCurrentUserId } from "@/lib/current-user";
 
-// Redirects to /activity, not /exercises/[id] — this is now triggered from
-// the "Add exercise" modal on Activity, so closing it back onto the page it
+// Redirects to /plan, not /exercises/[id] — this is now triggered from
+// the "Add Exercise" modal on plan, so closing it back onto the page it
 // was opened from (with the new exercise now visible in the list) is the
-// right result, not a detail-page navigation.
+// right result, not a detail-page navigation. Also the submit path for
+// "add from library" — same action, the form is just pre-filled from a
+// library exercise's data instead of starting blank.
 export async function createExerciseAction(formData: FormData) {
   const parsed = createExerciseSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -19,8 +21,8 @@ export async function createExerciseAction(formData: FormData) {
   const userId = await getCurrentUserId();
   await createCustomExercise(userId, parsed.data);
 
-  revalidatePath("/activity");
-  redirect("/activity");
+  revalidatePath("/plan");
+  redirect("/plan");
 }
 
 // Bound to a specific exerciseId via .bind(null, exercise.id) where the
@@ -35,11 +37,27 @@ export async function updateExerciseTargetsAction(exerciseId: string, formData: 
   revalidatePath(`/exercises/${exerciseId}`);
 }
 
-// Triggered per-row from the "Add exercise from library" modal — each row
-// is its own tiny form bound to that exercise's id.
-export async function addExerciseToLibraryAction(exerciseId: string) {
+// Every exercise a user owns is a custom row now — no more library-bookmark
+// distinction, so this is always the same delete path.
+export async function removeExerciseAction(exerciseId: string) {
   const userId = await getCurrentUserId();
-  await addExerciseToUser(userId, exerciseId);
+  await deleteCustomExercise(userId, exerciseId);
+  revalidatePath("/plan");
+}
 
-  revalidatePath("/activity");
+
+// Bound to a specific exerciseId via .bind(null, exercise.id) — same
+// validation as create, since it's the exact same field set, just applied
+// as an update instead of an insert.
+export async function updateExerciseAction(exerciseId: string, formData: FormData) {
+  const parsed = createExerciseSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((issue) => issue.message).join(", "));
+  }
+
+  const userId = await getCurrentUserId();
+  await updateCustomExercise(userId, exerciseId, parsed.data);
+
+  revalidatePath("/plan");
+  redirect("/plan");
 }

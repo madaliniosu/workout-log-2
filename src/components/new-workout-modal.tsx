@@ -9,7 +9,7 @@ import { createWorkoutAction } from "@/actions/workout-actions";
 // built from things you've chosen to track, not the raw dataset.
 export function NewWorkoutModal({ exercises }: { exercises: ExerciseOption[] }) {
   return (
-    <Modal triggerLabel="+ New workout" triggerClassName="text-sm underline" title="New Workout">
+    <Modal trigger="+ New workout" triggerClassName="text-sm underline" title="New Workout">
       <WorkoutForm action={createWorkoutAction} exercises={exercises} submitLabel="Create workout" />
     </Modal>
   );

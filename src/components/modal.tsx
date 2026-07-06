@@ -8,12 +8,12 @@ import { X } from "lucide-react";
 // children is a render-prop so modal content can call close() itself (e.g.
 // after a client-side action succeeds) without lifting state up.
 export function Modal({
-  triggerLabel,
+  trigger,
   triggerClassName,
   title,
   children,
 }: {
-  triggerLabel: string;
+  trigger: ReactNode;
   triggerClassName?: string;
   title: string;
   children: ReactNode;
@@ -32,7 +32,7 @@ export function Modal({
   return (
     <>
       <button type="button" onClick={open} className={triggerClassName}>
-        {triggerLabel}
+        {trigger}
       </button>
 
       {/* The dialog itself is a full-viewport, transparent, flex-centered

@@ -37,11 +37,34 @@ export async function updateExerciseTargetsAction(exerciseId: string, formData: 
   revalidatePath(`/exercises/${exerciseId}`);
 }
 
+// Postgres foreign-key-violation code (23503). postgres.js can surface this
+// either directly on the thrown error or nested under its `cause` — check
+// both rather than assume one shape.
+function isForeignKeyViolation(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const code = "code" in error ? error.code : undefined;
+  const cause = "cause" in error ? error.cause : undefined;
+  const causeCode = typeof cause === "object" && cause !== null && "code" in cause ? cause.code : undefined;
+  return code === "23503" || causeCode === "23503";
+}
+
 // Every exercise a user owns is a custom row now — no more library-bookmark
-// distinction, so this is always the same delete path.
+// distinction, so this is always the same delete path. Throws a readable
+// message instead of a raw Postgres error when the exercise is still
+// referenced by a workout or has logged sets (the RESTRICT foreign keys
+// doing their job — this isn't a bug, it's the point of them).
 export async function removeExerciseAction(exerciseId: string) {
   const userId = await getCurrentUserId();
-  await deleteCustomExercise(userId, exerciseId);
+
+  try {
+    await deleteCustomExercise(userId, exerciseId);
+  } catch (error) {
+    if (isForeignKeyViolation(error)) {
+      throw new Error("Can't remove this exercise — it's used in a workout or has logged sets.");
+    }
+    throw error;
+  }
+
   revalidatePath("/plan");
 }
 

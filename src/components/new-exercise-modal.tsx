@@ -17,7 +17,7 @@ export function NewExerciseModal({
   filterOptions: FilterOptions;
 }) {
   return (
-    <Modal triggerLabel="New Exercise" triggerClassName="text-sm underline" title="New Exercise">
+    <Modal trigger="New Exercise" triggerClassName="text-sm underline" title="New Exercise">
       <NewExerciseModalBody exercises={exercises} recentExerciseIds={recentExerciseIds} filterOptions={filterOptions} />
     </Modal>
   );

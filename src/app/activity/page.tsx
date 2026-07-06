@@ -1,25 +1,22 @@
 import Link from "next/link";
-import { getExerciseFilterOptions, getExerciseLibrary, getUserExercises } from "@/db/queries/exercises";
+import { getExerciseFilterOptions, getExerciseLibrary, getCustomExercises } from "@/db/queries/exercises";
+import { getRecentlyLoggedExerciseIds } from "@/db/queries/sets";
 import { getWorkouts } from "@/db/queries/workouts";
 import { getCurrentUserId } from "@/lib/current-user";
-import { AddCustomExerciseModal } from "@/components/add-custom-exercise-modal";
-import { AddFromLibraryModal } from "@/components/add-from-library-modal";
 import { removeExerciseAction } from "@/actions/exercise-actions";
+import { AddExerciseModal } from "@/components/add-exercise-modal";
+import { EditExerciseModal } from "@/components/edit-exercise-modal";
 
 export default async function ActivityPage() {
   const userId = await getCurrentUserId();
 
-  const [userExercises, library, filterOptions, workouts] = await Promise.all([
-    getUserExercises(userId),
+  const [userExercises, library, filterOptions, workouts, recentExerciseIds] = await Promise.all([
+    getCustomExercises(userId),
     getExerciseLibrary(),
     getExerciseFilterOptions(),
     getWorkouts(userId),
+    getRecentlyLoggedExerciseIds(userId, 5),
   ]);
-
-  // Library exercises the user has already added carry userId: null (they're
-  // still library rows, just referenced via userExercises) — custom ones
-  // carry the user's own id. This distinguishes them without a second query.
-  const alreadyAddedIds = userExercises.filter((exercise) => exercise.userId === null).map((exercise) => exercise.id);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
@@ -28,20 +25,23 @@ export default async function ActivityPage() {
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium">Exercises</h2>
-          <div className="flex gap-4">
-            <AddCustomExerciseModal filterOptions={filterOptions} />
-            <AddFromLibraryModal
-              exercises={library.map((exercise) => ({
-                id: exercise.id,
-                name: exercise.name,
-                category: exercise.category,
-                equipment: exercise.equipment,
-                targetMuscle: exercise.targetMuscle,
-              }))}
-              alreadyAddedIds={alreadyAddedIds}
-              filterOptions={filterOptions}
-            />
-          </div>
+          <AddExerciseModal
+            exercises={library.map((exercise) => ({
+              id: exercise.id,
+              name: exercise.name,
+              category: exercise.category,
+              equipment: exercise.equipment,
+              muscleGroup: exercise.muscleGroup,
+              targetMuscle: exercise.targetMuscle,
+              instructions: exercise.instructions,
+              tracksReps: exercise.tracksReps,
+              tracksWeight: exercise.tracksWeight,
+              tracksDuration: exercise.tracksDuration,
+              tracksDistance: exercise.tracksDistance,
+            }))}
+            recentExerciseIds={recentExerciseIds}
+            filterOptions={filterOptions}
+          />
         </div>
 
         <p className="mt-4 text-sm text-zinc-500">
@@ -55,12 +55,31 @@ export default async function ActivityPage() {
                 <span>{exercise.name}</span>
                 <span className="text-zinc-500">{exercise.category}</span>
               </Link>
-              <form action={removeExerciseAction.bind(null, exercise.id, exercise.userId !== null)} className="ml-4">
-                <button type="submit" className="text-sm text-red-600 hover:underline">
-                  Remove
-                </button>
-              </form>
+              <div className="ml-4 flex items-center gap-3">
+                <EditExerciseModal
+                  exerciseId={exercise.id}
+                  defaultValues={{
+                    name: exercise.name,
+                    category: exercise.category,
+                    equipment: exercise.equipment,
+                    muscleGroup: exercise.muscleGroup,
+                    targetMuscle: exercise.targetMuscle,
+                    instructions: exercise.instructions,
+                    tracksReps: exercise.tracksReps,
+                    tracksWeight: exercise.tracksWeight,
+                    tracksDuration: exercise.tracksDuration,
+                    tracksDistance: exercise.tracksDistance,
+                  }}
+                  filterOptions={filterOptions}
+                />
+                <form action={removeExerciseAction.bind(null, exercise.id)}>
+                  <button type="submit" className="text-sm text-red-600 hover:underline">
+                    Remove
+                  </button>
+                </form>
+              </div>
             </li>
+
           ))}
         </ul>
       </section>

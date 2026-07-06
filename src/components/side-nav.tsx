@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, BookOpen } from "lucide-react";
+import { Calendar, Dumbbell, BarChart3 } from "lucide-react";
 
 const links = [
   { href: "/", label: "Log", icon: Calendar, activeWhen: (path: string) => path === "/" || path.startsWith("/log") },
-  { href: "/activity", label: "Activity", icon: BookOpen, activeWhen: (path: string) => path.startsWith("/activity") },
+  { href: "/plan", label: "Plan", icon: Dumbbell, activeWhen: (path: string) => path.startsWith("/plan") },
+  { href: "/analyze", label: "Analyze", icon: BarChart3, activeWhen: (path: string) => path.startsWith("/analyze") },
 ];
 
 export function SideNav() {

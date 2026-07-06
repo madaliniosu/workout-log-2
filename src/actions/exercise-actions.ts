@@ -6,8 +6,8 @@ import { createExerciseSchema, exerciseTargetsSchema } from "@/lib/validations";
 import { createCustomExercise, updateCustomExercise, updateExerciseTargets, deleteCustomExercise } from "@/db/queries/exercises";
 import { getCurrentUserId } from "@/lib/current-user";
 
-// Redirects to /activity, not /exercises/[id] — this is now triggered from
-// the "Add Exercise" modal on Activity, so closing it back onto the page it
+// Redirects to /plan, not /exercises/[id] — this is now triggered from
+// the "Add Exercise" modal on plan, so closing it back onto the page it
 // was opened from (with the new exercise now visible in the list) is the
 // right result, not a detail-page navigation. Also the submit path for
 // "add from library" — same action, the form is just pre-filled from a
@@ -21,8 +21,8 @@ export async function createExerciseAction(formData: FormData) {
   const userId = await getCurrentUserId();
   await createCustomExercise(userId, parsed.data);
 
-  revalidatePath("/activity");
-  redirect("/activity");
+  revalidatePath("/plan");
+  redirect("/plan");
 }
 
 // Bound to a specific exerciseId via .bind(null, exercise.id) where the
@@ -42,7 +42,7 @@ export async function updateExerciseTargetsAction(exerciseId: string, formData: 
 export async function removeExerciseAction(exerciseId: string) {
   const userId = await getCurrentUserId();
   await deleteCustomExercise(userId, exerciseId);
-  revalidatePath("/activity");
+  revalidatePath("/plan");
 }
 
 
@@ -58,6 +58,6 @@ export async function updateExerciseAction(exerciseId: string, formData: FormDat
   const userId = await getCurrentUserId();
   await updateCustomExercise(userId, exerciseId, parsed.data);
 
-  revalidatePath("/activity");
-  redirect("/activity");
+  revalidatePath("/plan");
+  redirect("/plan");
 }

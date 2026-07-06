@@ -36,7 +36,7 @@ export default async function HomePage() {
         {workouts.length === 0 ? (
           <p className="mt-2 text-sm text-zinc-500">
             No workouts yet.{" "}
-            <Link href="/workouts/new" className="underline">
+            <Link href="/plan" className="underline">
               Create one
             </Link>
             .

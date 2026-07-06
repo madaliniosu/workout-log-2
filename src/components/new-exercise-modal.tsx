@@ -7,7 +7,7 @@ import { createExerciseAction } from "@/actions/exercise-actions";
 
 type LibraryExercise = ExerciseFormValues & { id: string };
 
-export function AddExerciseModal({
+export function NewExerciseModal({
   exercises,
   recentExerciseIds,
   filterOptions,
@@ -18,7 +18,7 @@ export function AddExerciseModal({
 }) {
   return (
     <Modal triggerLabel="New Exercise" triggerClassName="text-sm underline" title="New Exercise">
-      <AddExerciseModalBody exercises={exercises} recentExerciseIds={recentExerciseIds} filterOptions={filterOptions} />
+      <NewExerciseModalBody exercises={exercises} recentExerciseIds={recentExerciseIds} filterOptions={filterOptions} />
     </Modal>
   );
 }
@@ -38,7 +38,7 @@ function ExerciseRow({ exercise, onSelect }: { exercise: LibraryExercise; onSele
   );
 }
 
-function AddExerciseModalBody({
+function NewExerciseModalBody({
   exercises,
   recentExerciseIds,
   filterOptions,

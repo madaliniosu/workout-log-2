@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
 import { workouts, workoutExercises, exercises } from "@/db/schema";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 export async function getWorkouts(userId: string) {
   return db
@@ -59,4 +59,49 @@ export async function createWorkout(params: {
 
     return workout;
   });
+}
+
+
+
+// Same transactional shape as createWorkout, but replaces workout_exercises
+// wholesale rather than diffing — exactly the pattern the schema's own
+// comments anticipated ("rows are replaced wholesale whenever a workout is
+// edited"). Scoped to userId so a user can only ever edit their own.
+export async function updateWorkout(params: {
+  userId: string;
+  workoutId: string;
+  name: string;
+  notes?: string;
+  exercises: { exerciseId: string; targetSets: number }[];
+}) {
+  return db.transaction(async (tx) => {
+    const [workout] = await tx
+      .update(workouts)
+      .set({ name: params.name, notes: params.notes })
+      .where(and(eq(workouts.id, params.workoutId), eq(workouts.userId, params.userId)))
+      .returning();
+
+    await tx.delete(workoutExercises).where(eq(workoutExercises.workoutId, params.workoutId));
+
+    if (params.exercises.length > 0) {
+      await tx.insert(workoutExercises).values(
+        params.exercises.map((exercise, i) => ({
+          workoutId: params.workoutId,
+          exerciseId: exercise.exerciseId,
+          position: i + 1,
+          targetSets: exercise.targetSets,
+        }))
+      );
+    }
+
+    return workout;
+  });
+}
+
+// workout_exercises cascade-deletes automatically; logged_sets.workout_id
+// is set to NULL (not deleted) — history from a deleted workout survives as
+// ad-hoc-looking logs, per the schema's cascade rules. No RESTRICT concern
+// here, unlike deleting an exercise with history.
+export async function deleteWorkout(userId: string, workoutId: string) {
+  await db.delete(workouts).where(and(eq(workouts.id, workoutId), eq(workouts.userId, userId)));
 }

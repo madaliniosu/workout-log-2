@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, BookOpen, Dumbbell } from "lucide-react";
+import { Calendar, BookOpen } from "lucide-react";
 
 const links = [
   { href: "/", label: "Log", icon: Calendar, activeWhen: (path: string) => path === "/" || path.startsWith("/log") },

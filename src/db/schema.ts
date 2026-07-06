@@ -4,6 +4,7 @@ import {
   text,
   integer,
   real,
+  boolean,
   timestamp,
   index,
   unique,
@@ -57,6 +58,14 @@ export const exercises = pgTable(
     targetWeightKg: real("target_weight_kg"),
     targetDurationSeconds: integer("target_duration_seconds"),
     targetDistanceMeters: real("target_distance_meters"),
+        // Which metrics this exercise actually measures — drives which input
+    // pairs (planned/actual) get shown when logging it. Independent of the
+    // target_* values above: an exercise can track reps without a specific
+    // target number set yet.
+    tracksReps: boolean("tracks_reps").notNull().default(false),
+    tracksWeight: boolean("tracks_weight").notNull().default(false),
+    tracksDuration: boolean("tracks_duration").notNull().default(false),
+    tracksDistance: boolean("tracks_distance").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()

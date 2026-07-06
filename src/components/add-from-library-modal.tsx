@@ -29,9 +29,7 @@ export function AddFromLibraryModal({
 }) {
   return (
     <Modal triggerLabel="Add exercise from library" triggerClassName="text-sm underline" title="Add from library">
-      {() => (
-        <LibraryPicker exercises={exercises} initialAddedIds={alreadyAddedIds} filterOptions={filterOptions} />
-      )}
+      <LibraryPicker exercises={exercises} initialAddedIds={alreadyAddedIds} filterOptions={filterOptions} />
     </Modal>
   );
 }

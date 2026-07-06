@@ -28,7 +28,7 @@ export default async function ActivityPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium">Exercises</h2>
           <div className="flex gap-4">
-            <AddCustomExerciseModal />
+            <AddCustomExerciseModal filterOptions={filterOptions} />
             <AddFromLibraryModal
               exercises={library.map((exercise) => ({
                 id: exercise.id,

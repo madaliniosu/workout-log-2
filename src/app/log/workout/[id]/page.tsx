@@ -36,11 +36,16 @@ export default async function LogWorkoutPage({
                   key={i}
                   exerciseId={slot.exercise.id}
                   setNumber={i + 1}
+                  tracksReps={slot.exercise.tracksReps}
+                  tracksWeight={slot.exercise.tracksWeight}
+                  tracksDuration={slot.exercise.tracksDuration}
+                  tracksDistance={slot.exercise.tracksDistance}
                   plannedReps={slot.exercise.targetReps}
                   plannedWeightKg={slot.exercise.targetWeightKg}
                   plannedDurationSeconds={slot.exercise.targetDurationSeconds}
                   plannedDistanceMeters={slot.exercise.targetDistanceMeters}
                 />
+
               ))}
             </div>
           </div>

@@ -40,15 +40,17 @@ export async function getExerciseById(id: string) {
 // data itself rather than a lookup table, per the schema's decision to keep
 // these as plain text columns.
 export async function getExerciseFilterOptions() {
-  const [categories, equipmentTypes, targetMuscles] = await Promise.all([
+  const [categories, equipmentTypes, muscleGroups, targetMuscles] = await Promise.all([
     db.selectDistinct({ value: exercises.category }).from(exercises).where(isNull(exercises.userId)).orderBy(asc(exercises.category)),
     db.selectDistinct({ value: exercises.equipment }).from(exercises).where(isNull(exercises.userId)).orderBy(asc(exercises.equipment)),
+    db.selectDistinct({ value: exercises.muscleGroup }).from(exercises).where(isNull(exercises.userId)).orderBy(asc(exercises.muscleGroup)),
     db.selectDistinct({ value: exercises.targetMuscle }).from(exercises).where(isNull(exercises.userId)).orderBy(asc(exercises.targetMuscle)),
   ]);
 
   return {
     categories: categories.map((c) => c.value).filter((v): v is string => Boolean(v)),
     equipmentTypes: equipmentTypes.map((e) => e.value).filter((v): v is string => Boolean(v)),
+    muscleGroups: muscleGroups.map((m) => m.value).filter((v): v is string => Boolean(v)),
     targetMuscles: targetMuscles.map((t) => t.value).filter((v): v is string => Boolean(v)),
   };
 }

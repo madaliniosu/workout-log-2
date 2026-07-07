@@ -1,10 +1,27 @@
-export default function AnalyzePage() {
+import { getCurrentUserId } from "@/lib/current-user";
+import { getLoggedSetRows, groupBySession, groupByExercise } from "@/db/queries/sets";
+import { Tabs } from "@/components/tabs";
+import { HistoryList } from "@/components/history-list";
+import { ProgressExplorer } from "@/components/progress-explorer";
+
+export default async function AnalyzePage() {
+  const userId = await getCurrentUserId();
+  const rows = await getLoggedSetRows(userId);
+  const sessions = groupBySession(rows);
+  const histories = groupByExercise(rows);
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-2xl font-semibold">Analyze</h1>
-      <p className="mt-4 text-sm text-muted">
-        Progress charts and workout history are coming soon.
-      </p>
+
+      <div className="mt-6">
+        <Tabs
+          tabs={[
+            { label: "Progress", content: <ProgressExplorer histories={histories} /> },
+            { label: "History", content: <HistoryList sessions={sessions} /> },
+          ]}
+        />
+      </div>
     </main>
   );
 }

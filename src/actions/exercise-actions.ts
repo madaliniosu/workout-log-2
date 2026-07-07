@@ -3,7 +3,14 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createExerciseSchema, exerciseTargetsSchema } from "@/lib/validations";
-import { createCustomExercise, updateCustomExercise, updateExerciseTargets, deleteCustomExercise } from "@/db/queries/exercises";
+import {
+    createCustomExercise,
+    updateCustomExercise,
+    updateExerciseTargets,
+    deleteCustomExercise,
+    archiveExercise,
+    restoreExercise,
+} from "@/db/queries/exercises";
 import { getCurrentUserId } from "@/lib/current-user";
 
 // Redirects to /plan, not /exercises/[id] — this is now triggered from
@@ -13,39 +20,51 @@ import { getCurrentUserId } from "@/lib/current-user";
 // "add from library" — same action, the form is just pre-filled from a
 // library exercise's data instead of starting blank.
 export async function createExerciseAction(formData: FormData) {
-  const parsed = createExerciseSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues.map((issue) => issue.message).join(", "));
-  }
+    const parsed = createExerciseSchema.safeParse(Object.fromEntries(formData));
+    if (!parsed.success) {
+        throw new Error(
+            parsed.error.issues.map((issue) => issue.message).join(", "),
+        );
+    }
 
-  const userId = await getCurrentUserId();
-  await createCustomExercise(userId, parsed.data);
+    const userId = await getCurrentUserId();
+    await createCustomExercise(userId, parsed.data);
 
-  revalidatePath("/plan");
-  redirect("/plan");
+    revalidatePath("/plan");
+    redirect("/plan");
 }
 
 // Bound to a specific exerciseId via .bind(null, exercise.id) where the
 // form is rendered — see the detail page in the next step.
-export async function updateExerciseTargetsAction(exerciseId: string, formData: FormData) {
-  const parsed = exerciseTargetsSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues.map((issue) => issue.message).join(", "));
-  }
+export async function updateExerciseTargetsAction(
+    exerciseId: string,
+    formData: FormData,
+) {
+    const parsed = exerciseTargetsSchema.safeParse(
+        Object.fromEntries(formData),
+    );
+    if (!parsed.success) {
+        throw new Error(
+            parsed.error.issues.map((issue) => issue.message).join(", "),
+        );
+    }
 
-  await updateExerciseTargets(exerciseId, parsed.data);
-  revalidatePath(`/exercises/${exerciseId}`);
+    await updateExerciseTargets(exerciseId, parsed.data);
+    revalidatePath(`/exercises/${exerciseId}`);
 }
 
 // Postgres foreign-key-violation code (23503). postgres.js can surface this
 // either directly on the thrown error or nested under its `cause` — check
 // both rather than assume one shape.
 function isForeignKeyViolation(error: unknown): boolean {
-  if (typeof error !== "object" || error === null) return false;
-  const code = "code" in error ? error.code : undefined;
-  const cause = "cause" in error ? error.cause : undefined;
-  const causeCode = typeof cause === "object" && cause !== null && "code" in cause ? cause.code : undefined;
-  return code === "23503" || causeCode === "23503";
+    if (typeof error !== "object" || error === null) return false;
+    const code = "code" in error ? error.code : undefined;
+    const cause = "cause" in error ? error.cause : undefined;
+    const causeCode =
+        typeof cause === "object" && cause !== null && "code" in cause
+            ? cause.code
+            : undefined;
+    return code === "23503" || causeCode === "23503";
 }
 
 // Every exercise a user owns is a custom row now — no more library-bookmark
@@ -54,33 +73,51 @@ function isForeignKeyViolation(error: unknown): boolean {
 // referenced by a workout or has logged sets (the RESTRICT foreign keys
 // doing their job — this isn't a bug, it's the point of them).
 export async function removeExerciseAction(exerciseId: string) {
-  const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId();
 
-  try {
-    await deleteCustomExercise(userId, exerciseId);
-  } catch (error) {
-    if (isForeignKeyViolation(error)) {
-      throw new Error("Can't remove this exercise — it's used in a workout or has logged sets.");
+    try {
+        await deleteCustomExercise(userId, exerciseId);
+    } catch (error) {
+        if (isForeignKeyViolation(error)) {
+            throw new Error(
+                "Can't remove this exercise — it's used in a workout or has logged sets.",
+            );
+        }
+        throw error;
     }
-    throw error;
-  }
 
-  revalidatePath("/plan");
+    revalidatePath("/plan");
 }
-
 
 // Bound to a specific exerciseId via .bind(null, exercise.id) — same
 // validation as create, since it's the exact same field set, just applied
 // as an update instead of an insert.
-export async function updateExerciseAction(exerciseId: string, formData: FormData) {
-  const parsed = createExerciseSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues.map((issue) => issue.message).join(", "));
-  }
+export async function updateExerciseAction(
+    exerciseId: string,
+    formData: FormData,
+) {
+    const parsed = createExerciseSchema.safeParse(Object.fromEntries(formData));
+    if (!parsed.success) {
+        throw new Error(
+            parsed.error.issues.map((issue) => issue.message).join(", "),
+        );
+    }
 
-  const userId = await getCurrentUserId();
-  await updateCustomExercise(userId, exerciseId, parsed.data);
+    const userId = await getCurrentUserId();
+    await updateCustomExercise(userId, exerciseId, parsed.data);
 
-  revalidatePath("/plan");
-  redirect("/plan");
+    revalidatePath("/plan");
+    redirect("/plan");
+}
+
+export async function archiveExerciseAction(exerciseId: string) {
+    const userId = await getCurrentUserId();
+    await archiveExercise(userId, exerciseId);
+    revalidatePath("/plan");
+}
+
+export async function restoreExerciseAction(exerciseId: string) {
+    const userId = await getCurrentUserId();
+    await restoreExercise(userId, exerciseId);
+    revalidatePath("/plan");
 }

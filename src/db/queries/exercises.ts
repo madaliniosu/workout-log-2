@@ -1,7 +1,8 @@
 import { db } from "@/db/client";
-import { exercises } from "@/db/schema";
-import { and, asc, eq, isNull } from "drizzle-orm";
 import type { CreateExerciseInput, ExerciseTargetsInput } from "@/lib/validations";
+import { exercises, workoutExercises, workouts, loggedSets } from "@/db/schema";
+import { and, asc, count, eq, isNull, isNotNull } from "drizzle-orm";
+
 
 export type ExerciseFilters = {
   category?: string;
@@ -60,7 +61,7 @@ export async function getCustomExercises(userId: string) {
   return db
     .select()
     .from(exercises)
-    .where(eq(exercises.userId, userId))
+    .where(and(eq(exercises.userId, userId), isNull(exercises.archivedAt)))
     .orderBy(asc(exercises.name));
 }
 
@@ -108,4 +109,61 @@ export async function updateCustomExercise(userId: string, exerciseId: string, d
     .where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)))
     .returning();
   return exercise;
+}
+
+export async function getArchivedExercises(userId: string) {
+  return db
+    .select()
+    .from(exercises)
+    .where(and(eq(exercises.userId, userId), isNotNull(exercises.archivedAt)))
+    .orderBy(asc(exercises.name));
+}
+
+// Same ownership scoping as deleteCustomExercise. Archive and restore are
+// both just flips of archivedAt — no rows move or disappear.
+export async function archiveExercise(userId: string, exerciseId: string) {
+  await db
+    .update(exercises)
+    .set({ archivedAt: new Date() })
+    .where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)));
+}
+
+export async function restoreExercise(userId: string, exerciseId: string) {
+  await db
+    .update(exercises)
+    .set({ archivedAt: null })
+    .where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)));
+}
+
+export type ExerciseUsage = {
+  workoutNames: string[];
+  loggedSetCount: number;
+};
+
+// What references each exercise — drives the edit modal's bottom action:
+// in a workout → blocked (remove it from the workout first); logged sets
+// only → Archive; nothing → true Delete. Workout names (not just a count)
+// so the modal can say *which* workout is in the way.
+export async function getExerciseUsage(userId: string): Promise<Record<string, ExerciseUsage>> {
+  const [workoutRefs, setCounts] = await Promise.all([
+    db
+      .select({ exerciseId: workoutExercises.exerciseId, workoutName: workouts.name })
+      .from(workoutExercises)
+      .innerJoin(workouts, eq(workoutExercises.workoutId, workouts.id))
+      .where(eq(workouts.userId, userId)),
+    db
+      .select({ exerciseId: loggedSets.exerciseId, loggedSetCount: count() })
+      .from(loggedSets)
+      .where(eq(loggedSets.userId, userId))
+      .groupBy(loggedSets.exerciseId),
+  ]);
+
+  const usage: Record<string, ExerciseUsage> = {};
+  const entryFor = (exerciseId: string) =>
+    (usage[exerciseId] ??= { workoutNames: [], loggedSetCount: 0 });
+
+  for (const ref of workoutRefs) entryFor(ref.exerciseId).workoutNames.push(ref.workoutName);
+  for (const row of setCounts) entryFor(row.exerciseId).loggedSetCount = row.loggedSetCount;
+
+  return usage;
 }

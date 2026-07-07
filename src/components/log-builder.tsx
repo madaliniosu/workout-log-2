@@ -6,28 +6,21 @@ import { AddExerciseModal } from "@/components/add-exercise-to-log-modal";
 import { AddWorkoutModal } from "@/components/add-workout-to-log-modal";
 import { SetRow } from "@/components/set-row";
 import { logSetsAction } from "@/actions/set-actions";
+import type { TracksFlags } from "@/lib/format-set";
 
-export type LogExerciseOption = {
+export type LogExerciseOption = TracksFlags & {
   id: string;
   name: string;
-  tracksReps: boolean;
-  tracksWeight: boolean;
-  tracksDuration: boolean;
-  tracksDistance: boolean;
   targetReps: number | null;
   targetWeightKg: number | null;
   targetDurationSeconds: number | null;
   targetDistanceMeters: number | null;
 };
 
-export type LogWorkoutSlot = {
+export type LogWorkoutSlot = TracksFlags & {
   exerciseId: string;
   exerciseName: string;
   sets: number;
-  tracksReps: boolean;
-  tracksWeight: boolean;
-  tracksDuration: boolean;
-  tracksDistance: boolean;
   plannedReps: number | null;
   plannedWeightKg: number | null;
   plannedDurationSeconds: number | null;
@@ -40,22 +33,12 @@ export type LogWorkoutOption = {
   slots: LogWorkoutSlot[];
 };
 
-// What AddExerciseModal hands back on submit — everything needed for one
-// log entry except the bookkeeping fields (key, workout linkage) that only
-// LogBuilder itself needs to add.
-export type NewExerciseLogEntry = {
-  exerciseId: string;
-  exerciseName: string;
-  sets: number;
-  tracksReps: boolean;
-  tracksWeight: boolean;
-  tracksDuration: boolean;
-  tracksDistance: boolean;
-  plannedReps: number | null;
-  plannedWeightKg: number | null;
-  plannedDurationSeconds: number | null;
-  plannedDistanceMeters: number | null;
-};
+// What AddExerciseModal hands back on submit — deliberately the same shape
+// a workout slot expands to, since both become identical entries in the
+// list; only the bookkeeping fields (key, workout linkage) differ, and
+// LogBuilder adds those itself.
+export type NewExerciseLogEntry = LogWorkoutSlot;
+
 
 type LogEntry = NewExerciseLogEntry & {
   key: string;

@@ -1,13 +1,14 @@
 import { getCustomExercises } from "@/db/queries/exercises";
-import { getWorkouts, getWorkoutExercises } from "@/db/queries/workouts";
+import { getWorkoutsWithSlots, getWorkoutExercises } from "@/db/queries/workouts";
 import { getCurrentUserId } from "@/lib/current-user";
 import { LogBuilder, type LogExerciseOption, type LogWorkoutOption } from "@/components/log-builder";
 
 export default async function HomePage() {
   const userId = await getCurrentUserId();
-  const [customExercises, workouts] = await Promise.all([
+
+  const [customExercises, workoutsWithSlots] = await Promise.all([
     getCustomExercises(userId),
-    getWorkouts(userId),
+    getWorkoutsWithSlots(userId),
   ]);
 
   const exerciseOptions: LogExerciseOption[] = customExercises.map((exercise) => ({
@@ -23,25 +24,23 @@ export default async function HomePage() {
     targetDistanceMeters: exercise.targetDistanceMeters,
   }));
 
-  const workoutOptions: LogWorkoutOption[] = await Promise.all(
-    workouts.map(async (workout) => ({
-      id: workout.id,
-      name: workout.name,
-      slots: (await getWorkoutExercises(workout.id)).map((slot) => ({
-        exerciseId: slot.exercise.id,
-        exerciseName: slot.exercise.name,
-        sets: slot.targetSets,
-        tracksReps: slot.exercise.tracksReps,
-        tracksWeight: slot.exercise.tracksWeight,
-        tracksDuration: slot.exercise.tracksDuration,
-        tracksDistance: slot.exercise.tracksDistance,
-        plannedReps: slot.exercise.targetReps,
-        plannedWeightKg: slot.exercise.targetWeightKg,
-        plannedDurationSeconds: slot.exercise.targetDurationSeconds,
-        plannedDistanceMeters: slot.exercise.targetDistanceMeters,
-      })),
-    }))
-  );
+  const workoutOptions: LogWorkoutOption[] = workoutsWithSlots.map((workout) => ({
+    id: workout.id,
+    name: workout.name,
+    slots: workout.slots.map((slot) => ({
+      exerciseId: slot.exercise.id,
+      exerciseName: slot.exercise.name,
+      sets: slot.targetSets,
+      tracksReps: slot.exercise.tracksReps,
+      tracksWeight: slot.exercise.tracksWeight,
+      tracksDuration: slot.exercise.tracksDuration,
+      tracksDistance: slot.exercise.tracksDistance,
+      plannedReps: slot.exercise.targetReps,
+      plannedWeightKg: slot.exercise.targetWeightKg,
+      plannedDurationSeconds: slot.exercise.targetDurationSeconds,
+      plannedDistanceMeters: slot.exercise.targetDistanceMeters,
+    })),
+  }));
 
   return (
     <main className="mx-auto max-w-xl px-6 py-12">

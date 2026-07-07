@@ -32,3 +32,17 @@ function formatMetric(actual: number | null, planned: number | null, unit: strin
   const actualText = actual == null ? "—" : `${actual} ${unit}`;
   return planned == null ? actualText : `${actualText} (target ${planned})`;
 }
+
+// Date labels for logged data are produced server-side (the groupers in
+// db/queries/sets.ts call these) so client components never format dates:
+// browser-side formatting during hydration can disagree with the
+// server-rendered HTML on locale/timezone and trigger hydration-mismatch
+// warnings. Living here, the display format stays a presentation decision
+// rather than a query-layer one.
+export function formatSessionTimestamp(date: Date): string {
+  return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
+export function formatDateLabel(date: Date): string {
+  return date.toLocaleDateString(undefined, { dateStyle: "medium" });
+}

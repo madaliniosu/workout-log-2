@@ -90,14 +90,34 @@ export async function updateExerciseTargets(id: string, targets: ExerciseTargets
   return exercise;
 }
 
+// Postgres foreign-key-violation code (23503). postgres.js can surface this
+// either directly on the thrown error or nested under its `cause` — check
+// both rather than assume one shape.
+function isForeignKeyViolation(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const code = "code" in error ? error.code : undefined;
+  const cause = "cause" in error ? error.cause : undefined;
+  const causeCode =
+    typeof cause === "object" && cause !== null && "code" in cause ? cause.code : undefined;
+  return code === "23503" || causeCode === "23503";
+}
+
 // Deletes a custom exercise outright. Scoped to userId too, not just id, so
 // a user can only ever delete their own — the right invariant to encode now
-// even pre-auth. Will throw on a foreign key violation if the exercise has
-// ever been logged or used in a workout (workout_exercises/logged_sets are
-// RESTRICT on purpose), rather than silently deleting that history.
+// even pre-auth. The RESTRICT foreign keys refuse the delete if the exercise
+// is in a workout or has logged sets; that driver-level error is translated
+// into a readable one here, so callers never see Postgres error shapes.
 export async function deleteCustomExercise(userId: string, exerciseId: string) {
-  await db.delete(exercises).where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)));
+  try {
+    await db.delete(exercises).where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)));
+  } catch (error) {
+    if (isForeignKeyViolation(error)) {
+      throw new Error("Can't remove this exercise — it's used in a workout or has logged sets.");
+    }
+    throw error;
+  }
 }
+
 
 
 // Scoped to userId too, same ownership invariant as deleteCustomExercise —

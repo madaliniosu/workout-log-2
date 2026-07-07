@@ -2,13 +2,44 @@ import { db } from "@/db/client";
 import { workouts, workoutExercises, exercises } from "@/db/schema";
 import { and, asc, eq } from "drizzle-orm";
 
-export async function getWorkouts(userId: string) {
-  return db
-    .select()
+// Every workout with its ordered slots in one query — the two left joins
+// fan out to one row per slot (or a single slot-less row for an empty
+// workout), grouped back here. Replaces a query-per-workout loop: both the
+// home page's Add Workout modal and Plan's workout cards need every
+// template expanded, and N+1 round trips grow with the workout count.
+export async function getWorkoutsWithSlots(userId: string) {
+  const rows = await db
+    .select({
+      workout: workouts,
+      slotId: workoutExercises.id,
+      targetSets: workoutExercises.targetSets,
+      exercise: exercises,
+    })
     .from(workouts)
+    .leftJoin(workoutExercises, eq(workoutExercises.workoutId, workouts.id))
+    .leftJoin(exercises, eq(workoutExercises.exerciseId, exercises.id))
     .where(eq(workouts.userId, userId))
-    .orderBy(asc(workouts.name));
+    .orderBy(asc(workouts.name), asc(workoutExercises.position));
+
+  type WorkoutWithSlots = (typeof rows)[number]["workout"] & {
+    slots: { id: string; targetSets: number; exercise: NonNullable<(typeof rows)[number]["exercise"]> }[];
+  };
+  const byId = new Map<string, WorkoutWithSlots>();
+
+  for (const row of rows) {
+    let workout = byId.get(row.workout.id);
+    if (!workout) {
+      workout = { ...row.workout, slots: [] };
+      byId.set(row.workout.id, workout);
+    }
+    if (row.slotId !== null && row.targetSets !== null && row.exercise !== null) {
+      workout.slots.push({ id: row.slotId, targetSets: row.targetSets, exercise: row.exercise });
+    }
+  }
+
+  return Array.from(byId.values());
 }
+
 
 export async function getWorkoutById(id: string) {
   const [workout] = await db.select().from(workouts).where(eq(workouts.id, id));

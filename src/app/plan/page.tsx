@@ -11,7 +11,7 @@ import { getCurrentUserId } from "@/lib/current-user";
 import { NewExerciseModal } from "@/components/new-exercise-modal";
 import { EditExerciseModal } from "@/components/edit-exercise-modal";
 import { Tabs } from "@/components/tabs";
-import { getWorkouts, getWorkoutExercises } from "@/db/queries/workouts";
+import { getWorkoutsWithSlots } from "@/db/queries/workouts";
 import { deleteWorkoutAction } from "@/actions/workout-actions";
 import { NewWorkoutModal } from "@/components/new-workout-modal";
 import { EditWorkoutModal } from "@/components/edit-workout-modal";
@@ -24,7 +24,7 @@ export default async function PlanPage() {
         userExercises,
         library,
         filterOptions,
-        workouts,
+        workoutsWithSlots,
         recentExerciseIds,
         archivedExercises,
         exerciseUsage,
@@ -32,18 +32,11 @@ export default async function PlanPage() {
         getCustomExercises(userId),
         getExerciseLibrary(),
         getExerciseFilterOptions(),
-        getWorkouts(userId),
+        getWorkoutsWithSlots(userId),
         getRecentlyLoggedExerciseIds(userId, 5),
         getArchivedExercises(userId),
         getExerciseUsage(userId),
     ]);
-
-    const workoutsWithSlots = await Promise.all(
-        workouts.map(async (workout) => ({
-            ...workout,
-            slots: await getWorkoutExercises(workout.id),
-        })),
-    );
 
     return (
         <main className="mx-auto max-w-3xl px-6 py-12">

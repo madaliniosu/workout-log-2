@@ -2,7 +2,12 @@ import { randomUUID } from "node:crypto";
 import { db } from "@/db/client";
 import { loggedSets, exercises, workouts } from "@/db/schema";
 import { asc, desc, eq, sql } from "drizzle-orm";
-import type { SetMetrics, TracksFlags } from "@/lib/format-set";
+import {
+    formatDateLabel,
+    formatSessionTimestamp,
+    type SetMetrics,
+    type TracksFlags,
+} from "@/lib/format-set";
 
 export type LogSetInput = {
     setNumber: number;
@@ -152,17 +157,16 @@ export function groupBySession(rows: LoggedSetRow[]): LoggedSession[] {
         if (!session) {
             session = {
                 sessionId: row.sessionId,
-                performedAtLabel: row.performedAt.toLocaleString(undefined, {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                }),
+                performedAtLabel: formatSessionTimestamp(row.performedAt),
                 exercises: [],
             };
             sessions.set(row.sessionId, session);
         }
 
         let exerciseGroup = session.exercises.find(
-            (group) => group.exerciseId === row.exerciseId && group.workoutId === row.workoutId,
+            (group) =>
+                group.exerciseId === row.exerciseId &&
+                group.workoutId === row.workoutId,
         );
         if (!exerciseGroup) {
             exerciseGroup = {
@@ -179,7 +183,10 @@ export function groupBySession(rows: LoggedSetRow[]): LoggedSession[] {
             session.exercises.push(exerciseGroup);
         }
 
-        exerciseGroup.sets.push({ setNumber: row.setNumber, ...pickMetrics(row) });
+        exerciseGroup.sets.push({
+            setNumber: row.setNumber,
+            ...pickMetrics(row),
+        });
     }
 
     return Array.from(sessions.values());
@@ -196,11 +203,6 @@ export type ExerciseHistory = TracksFlags & {
     entries: ExerciseHistoryEntry[];
 };
 
-// The same rows grouped by exercise instead of by visit. Exercises come out
-// most-recently-logged first (map insertion order, since rows arrive newest
-// first) — what you're actively training tops the Progress list. Entries
-// within an exercise are re-sorted oldest first, read top-to-bottom as a
-// timeline.
 export function groupByExercise(rows: LoggedSetRow[]): ExerciseHistory[] {
     const buckets = new Map<string, LoggedSetRow[]>();
 
@@ -229,9 +231,7 @@ export function groupByExercise(rows: LoggedSetRow[]): ExerciseHistory[] {
                         a.setNumber - b.setNumber,
                 )
                 .map((row) => ({
-                    performedAtLabel: row.performedAt.toLocaleDateString(undefined, {
-                        dateStyle: "medium",
-                    }),
+                    performedAtLabel: formatDateLabel(row.performedAt),
                     setNumber: row.setNumber,
                     ...pickMetrics(row),
                 })),

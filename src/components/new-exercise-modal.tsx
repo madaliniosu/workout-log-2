@@ -45,7 +45,7 @@ export function NewExerciseModal({
   }
 
   return (
-    <Modal trigger="New Exercise" triggerClassName="text-sm underline" title="New Exercise" onClose={reset}>
+    <Modal trigger="+ New Exercise" triggerClassName="text-sm underline" title="New Exercise" onClose={reset}>
       <div className="flex flex-col gap-4">
         <input
           type="text"

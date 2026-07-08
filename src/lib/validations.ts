@@ -39,17 +39,6 @@ export const createExerciseSchema = z.object({
 
 export type CreateExerciseInput = z.infer<typeof createExerciseSchema>;
 
-// Reused on the detail page for editing targets on any exercise (library or
-// custom) — deliberately just the four target fields, nothing else editable.
-export const exerciseTargetsSchema = z.object({
-    targetReps: optionalNonNegativeInt,
-    targetWeightKg: optionalNonNegativeNumber,
-    targetDurationSeconds: optionalNonNegativeInt,
-    targetDistanceMeters: optionalNonNegativeNumber,
-});
-
-export type ExerciseTargetsInput = z.infer<typeof exerciseTargetsSchema>;
-
 
 export const nullableUuid = z.preprocess(
     (value) => (value === "" ? null : value),
@@ -75,6 +64,10 @@ export type LogSetRowInput = z.infer<typeof logSetRowSchema>;
 export const createWorkoutSlotSchema = z.object({
     exerciseId: z.string().uuid(),
     targetSets: z.coerce.number().int().min(1),
+    targetReps: optionalNonNegativeInt,
+    targetWeightKg: optionalNonNegativeNumber,
+    targetDurationSeconds: optionalNonNegativeInt,
+    targetDistanceMeters: optionalNonNegativeNumber,
 });
 
 export type CreateWorkoutSlotInput = z.infer<typeof createWorkoutSlotSchema>;

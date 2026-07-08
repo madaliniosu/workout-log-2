@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import type { CreateExerciseInput, ExerciseTargetsInput } from "@/lib/validations";
+import type { CreateExerciseInput } from "@/lib/validations";
 import { exercises, workoutExercises, workouts, loggedSets } from "@/db/schema";
 import { and, asc, count, eq, isNull, isNotNull } from "drizzle-orm";
 
@@ -79,9 +79,18 @@ export async function createCustomExercise(userId: string, data: CreateExerciseI
   return exercise;
 }
 
-// Works on library exercises too: targets are a personal goal layered on
-// top of any exercise, not a property only custom exercises can have.
-export async function updateExerciseTargets(id: string, targets: ExerciseTargetsInput) {
+// Works on any exercise the user owns. Callers pass every field explicitly
+// — null clears a target — so this is a full overwrite of the four target
+// columns, not a partial patch.
+export async function updateExerciseTargets(
+  id: string,
+  targets: {
+    targetReps: number | null;
+    targetWeightKg: number | null;
+    targetDurationSeconds: number | null;
+    targetDistanceMeters: number | null;
+  }
+) {
   const [exercise] = await db
     .update(exercises)
     .set(targets)

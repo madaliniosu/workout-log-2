@@ -1,13 +1,12 @@
 "use client";
 
-import { ExerciseListBuilder } from "@/components/exercise-list-builder";
-
-export type ExerciseOption = { id: string; name: string };
+import { ExerciseListBuilder, type ExerciseOption, type InitialCard } from "@/components/exercise-list-builder";
+export type { ExerciseOption } from "@/components/exercise-list-builder";
 
 export type WorkoutFormValues = {
   name: string;
   notes: string | null;
-  exercises: { exerciseId: string; exerciseName: string; count: number }[];
+  exercises: InitialCard[];
 };
 
 // Shared by both the create-workout flow (blank) and the edit-workout flow

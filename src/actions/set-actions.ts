@@ -57,15 +57,11 @@ function groupByExercise(rows: ReturnType<typeof parseSetRows>) {
   return Array.from(groups.values());
 }
 
-// Single write path for every save. Ad-hoc exercises and workout-sourced
-// exercises differ only in whether each row's own workoutId is set — that's
-// now carried per row (see SetRow), so one action covers both /log and
-// /log/[id], and a single save can mix both kinds of rows.
 export async function logSetsAction(formData: FormData) {
   const rows = parseSetRows(formData);
   const userId = await getCurrentUserId();
 
   await logSets({ userId, exerciseSets: groupByExercise(rows) });
 
-  redirect("/");
+  redirect("/log");
 }

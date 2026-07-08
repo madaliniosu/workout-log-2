@@ -6,6 +6,8 @@ import { StartWorkoutModal } from "@/components/start-workout-modal";
 import { SetRow } from "@/components/set-row";
 import { logSetsAction } from "@/actions/set-actions";
 import type { TracksFlags } from "@/lib/format-set";
+import Image from "next/image";
+import justDoIt from "./just-do-it.gif";
 
 export type LogExerciseOption = TracksFlags & {
     id: string;
@@ -95,7 +97,11 @@ export function LogBuilder({
             </div>
 
             {entries.length === 0 ? (
-                <p className="text-sm text-muted">Just do it!</p>
+                <Image
+                    src={justDoIt}
+                    alt="Just do it!"
+                    className="w-240 rounded-xl"
+                />
             ) : (
                 <form action={logSetsAction} className="flex flex-col gap-8">
                     {entries.map((entry) => (

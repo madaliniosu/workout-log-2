@@ -43,7 +43,7 @@ export default async function HomePage() {
   }));
 
   return (
-    <main className="mx-auto max-w-xl px-6 py-12">
+    <main className="mx-auto max-w-xl px-0 sm:px-6 py-6 sm:py-12">
       <section className="mt-6">
         <div className="mt-2">
           <LogBuilder exercises={exerciseOptions} workouts={workoutOptions} />

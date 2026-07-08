@@ -51,7 +51,7 @@ export default async function WorkoutsPage() {
     }));
 
     return (
-        <main className="mx-auto max-w-3xl px-6 py-12">
+        <main className="mx-auto max-w-3xl px-0 sm:px-6 py-6 sm:py-12">
             <div className="mt-8">
                 <Tabs
                     tabs={[
@@ -71,7 +71,7 @@ export default async function WorkoutsPage() {
                                                 key={workout.id}
                                                 className="rounded-xl border border-border bg-white p-4"
                                             >
-                                                <div className="flex items-start justify-between">
+                                                <div className="flex items-start justify-between flex-wrap gap-2">
                                                     <div>
                                                         <h3 className="font-heading text-base font-semibold text-text">
                                                             {workout.name}

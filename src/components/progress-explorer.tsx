@@ -84,7 +84,7 @@ export function ProgressExplorer({ histories }: { histories: ExerciseHistory[] }
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-      <ul className="flex flex-col gap-1 sm:w-56 sm:shrink-0">
+      <ul className="flex flex-col gap-1 sm:w-full sm:w-56 sm:shrink-0">
         {histories.map((history) => (
           <li key={history.exerciseId}>
             <button

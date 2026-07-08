@@ -275,11 +275,11 @@ function ExerciseCombobox({
           }, 150);
         }}
         placeholder="Search exercises..."
-        className="h-11 w-56 rounded-xl border border-border px-4 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+        className="h-11 w-full sm:w-56 rounded-xl border border-border px-4 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
       />
 
       {isOpen && (
-        <ul className="absolute top-full z-10 mt-1 max-h-56 w-56 overflow-auto rounded-xl border border-border bg-white shadow-lg">
+        <ul className="absolute top-full z-10 mt-1 max-h-56 w-full sm:w-56 overflow-auto rounded-xl border border-border bg-white shadow-lg">
           {filtered.length === 0 && <li className="px-3 py-2 text-sm text-muted">No matches</li>}
           {filtered.map((exercise) => (
             <li key={exercise.id}>

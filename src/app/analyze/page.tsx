@@ -11,7 +11,7 @@ export default async function AnalyzePage() {
   const histories = groupByExercise(rows);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main className="mx-auto max-w-3xl px-0 sm:px-6 py-6 sm:py-12">
       <div className="mt-6">
         <Tabs
           tabs={[

@@ -1,7 +1,8 @@
 import { db } from "@/db/client";
-import { exercises } from "@/db/schema";
-import { and, asc, eq, isNull } from "drizzle-orm";
-import type { CreateExerciseInput, ExerciseTargetsInput } from "@/lib/validations";
+import type { CreateExerciseInput } from "@/lib/validations";
+import { exercises, workoutExercises, workouts, loggedSets } from "@/db/schema";
+import { and, asc, count, eq, isNull, isNotNull } from "drizzle-orm";
+
 
 export type ExerciseFilters = {
   category?: string;
@@ -60,7 +61,7 @@ export async function getCustomExercises(userId: string) {
   return db
     .select()
     .from(exercises)
-    .where(eq(exercises.userId, userId))
+    .where(and(eq(exercises.userId, userId), isNull(exercises.archivedAt)))
     .orderBy(asc(exercises.name));
 }
 
@@ -78,9 +79,18 @@ export async function createCustomExercise(userId: string, data: CreateExerciseI
   return exercise;
 }
 
-// Works on library exercises too: targets are a personal goal layered on
-// top of any exercise, not a property only custom exercises can have.
-export async function updateExerciseTargets(id: string, targets: ExerciseTargetsInput) {
+// Works on any exercise the user owns. Callers pass every field explicitly
+// — null clears a target — so this is a full overwrite of the four target
+// columns, not a partial patch.
+export async function updateExerciseTargets(
+  id: string,
+  targets: {
+    targetReps: number | null;
+    targetWeightKg: number | null;
+    targetDurationSeconds: number | null;
+    targetDistanceMeters: number | null;
+  }
+) {
   const [exercise] = await db
     .update(exercises)
     .set(targets)
@@ -89,14 +99,34 @@ export async function updateExerciseTargets(id: string, targets: ExerciseTargets
   return exercise;
 }
 
+// Postgres foreign-key-violation code (23503). postgres.js can surface this
+// either directly on the thrown error or nested under its `cause` — check
+// both rather than assume one shape.
+function isForeignKeyViolation(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const code = "code" in error ? error.code : undefined;
+  const cause = "cause" in error ? error.cause : undefined;
+  const causeCode =
+    typeof cause === "object" && cause !== null && "code" in cause ? cause.code : undefined;
+  return code === "23503" || causeCode === "23503";
+}
+
 // Deletes a custom exercise outright. Scoped to userId too, not just id, so
 // a user can only ever delete their own — the right invariant to encode now
-// even pre-auth. Will throw on a foreign key violation if the exercise has
-// ever been logged or used in a workout (workout_exercises/logged_sets are
-// RESTRICT on purpose), rather than silently deleting that history.
+// even pre-auth. The RESTRICT foreign keys refuse the delete if the exercise
+// is in a workout or has logged sets; that driver-level error is translated
+// into a readable one here, so callers never see Postgres error shapes.
 export async function deleteCustomExercise(userId: string, exerciseId: string) {
-  await db.delete(exercises).where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)));
+  try {
+    await db.delete(exercises).where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)));
+  } catch (error) {
+    if (isForeignKeyViolation(error)) {
+      throw new Error("Can't remove this exercise — it's used in a workout or has logged sets.");
+    }
+    throw error;
+  }
 }
+
 
 
 // Scoped to userId too, same ownership invariant as deleteCustomExercise —
@@ -108,4 +138,61 @@ export async function updateCustomExercise(userId: string, exerciseId: string, d
     .where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)))
     .returning();
   return exercise;
+}
+
+export async function getArchivedExercises(userId: string) {
+  return db
+    .select()
+    .from(exercises)
+    .where(and(eq(exercises.userId, userId), isNotNull(exercises.archivedAt)))
+    .orderBy(asc(exercises.name));
+}
+
+// Same ownership scoping as deleteCustomExercise. Archive and restore are
+// both just flips of archivedAt — no rows move or disappear.
+export async function archiveExercise(userId: string, exerciseId: string) {
+  await db
+    .update(exercises)
+    .set({ archivedAt: new Date() })
+    .where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)));
+}
+
+export async function restoreExercise(userId: string, exerciseId: string) {
+  await db
+    .update(exercises)
+    .set({ archivedAt: null })
+    .where(and(eq(exercises.id, exerciseId), eq(exercises.userId, userId)));
+}
+
+export type ExerciseUsage = {
+  workoutNames: string[];
+  loggedSetCount: number;
+};
+
+// What references each exercise — drives the edit modal's bottom action:
+// in a workout → blocked (remove it from the workout first); logged sets
+// only → Archive; nothing → true Delete. Workout names (not just a count)
+// so the modal can say *which* workout is in the way.
+export async function getExerciseUsage(userId: string): Promise<Record<string, ExerciseUsage>> {
+  const [workoutRefs, setCounts] = await Promise.all([
+    db
+      .select({ exerciseId: workoutExercises.exerciseId, workoutName: workouts.name })
+      .from(workoutExercises)
+      .innerJoin(workouts, eq(workoutExercises.workoutId, workouts.id))
+      .where(eq(workouts.userId, userId)),
+    db
+      .select({ exerciseId: loggedSets.exerciseId, loggedSetCount: count() })
+      .from(loggedSets)
+      .where(eq(loggedSets.userId, userId))
+      .groupBy(loggedSets.exerciseId),
+  ]);
+
+  const usage: Record<string, ExerciseUsage> = {};
+  const entryFor = (exerciseId: string) =>
+    (usage[exerciseId] ??= { workoutNames: [], loggedSetCount: 0 });
+
+  for (const ref of workoutRefs) entryFor(ref.exerciseId).workoutNames.push(ref.workoutName);
+  for (const row of setCounts) entryFor(row.exerciseId).loggedSetCount = row.loggedSetCount;
+
+  return usage;
 }

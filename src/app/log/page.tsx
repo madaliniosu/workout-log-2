@@ -1,95 +1,54 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getExerciseById } from "@/db/queries/exercises";
-import { logSetsAction } from "@/actions/set-actions";
-import { SetRow } from "@/components/set-row";
+import { getCustomExercises } from "@/db/queries/exercises";
+import { getWorkoutsWithSlots } from "@/db/queries/workouts";
+import { getCurrentUserId } from "@/lib/current-user";
+import { LogBuilder, type LogExerciseOption, type LogWorkoutOption } from "@/components/log-builder";
 
-// searchParams gives a plain string when a key appears once, and a string[]
-// when it appears more than once — normalize both to an array so exerciseId
-// and sets can always be paired up by index regardless of how many exercises
-// were picked.
-function toArray(value: string | string[] | undefined): string[] {
-    if (value === undefined) return [];
-    return Array.isArray(value) ? value : [value];
-}
+export default async function HomePage() {
+  const userId = await getCurrentUserId();
 
-export default async function LogPage({
-    searchParams,
-}: {
-    searchParams: Promise<{
-        exerciseId?: string | string[];
-        sets?: string | string[];
-    }>;
-}) {
-    const params = await searchParams;
-    const exerciseIds = toArray(params.exerciseId);
-    const setCounts = toArray(params.sets).map(Number);
+  const [customExercises, workoutsWithSlots] = await Promise.all([
+    getCustomExercises(userId),
+    getWorkoutsWithSlots(userId),
+  ]);
 
-    if (
-        exerciseIds.length === 0 ||
-        exerciseIds.length !== setCounts.length ||
-        setCounts.some((count) => !Number.isInteger(count) || count < 1)
-    ) {
-        notFound();
-    }
+  const exerciseOptions: LogExerciseOption[] = customExercises.map((exercise) => ({
+    id: exercise.id,
+    name: exercise.name,
+    tracksReps: exercise.tracksReps,
+    tracksWeight: exercise.tracksWeight,
+    tracksDuration: exercise.tracksDuration,
+    tracksDistance: exercise.tracksDistance,
+    targetReps: exercise.targetReps,
+    targetWeightKg: exercise.targetWeightKg,
+    targetDurationSeconds: exercise.targetDurationSeconds,
+    targetDistanceMeters: exercise.targetDistanceMeters,
+  }));
 
-    const maybeExercises = await Promise.all(
-        exerciseIds.map((id) => getExerciseById(id)),
-    );
-    const exercises: NonNullable<(typeof maybeExercises)[number]>[] = [];
-    for (const exercise of maybeExercises) {
-        if (!exercise) notFound();
-        exercises.push(exercise);
-    }
+  const workoutOptions: LogWorkoutOption[] = workoutsWithSlots.map((workout) => ({
+    id: workout.id,
+    name: workout.name,
+    slots: workout.slots.map((slot) => ({
+      exerciseId: slot.exercise.id,
+      exerciseName: slot.exercise.name,
+      sets: slot.targetSets,
+      tracksReps: slot.exercise.tracksReps,
+      tracksWeight: slot.exercise.tracksWeight,
+      tracksDuration: slot.exercise.tracksDuration,
+      tracksDistance: slot.exercise.tracksDistance,
+      plannedReps: slot.exercise.targetReps,
+      plannedWeightKg: slot.exercise.targetWeightKg,
+      plannedDurationSeconds: slot.exercise.targetDurationSeconds,
+      plannedDistanceMeters: slot.exercise.targetDistanceMeters,
+    })),
+  }));
 
-    return (
-        <main className="mx-auto max-w-2xl px-6 py-12">
-            <Link href="/" className="text-sm text-zinc-500 hover:underline">
-                ← Back
-            </Link>
-
-            <h1 className="mt-4 text-2xl font-semibold">Log sets</h1>
-
-            <form action={logSetsAction} className="mt-6 flex flex-col gap-8">
-                {exercises.map((exercise, exerciseIndex) => (
-                    <div key={exercise.id}>
-                        <h2 className="text-lg font-medium">{exercise.name}</h2>
-                        <div className="mt-2 flex flex-col gap-4">
-                            {Array.from(
-                                { length: setCounts[exerciseIndex] },
-                                (_, i) => (
-                                    <SetRow
-                                        key={i}
-                                        exerciseId={exercise.id}
-                                        setNumber={i + 1}
-                                        tracksReps={exercise.tracksReps}
-                                        tracksWeight={exercise.tracksWeight}
-                                        tracksDuration={exercise.tracksDuration}
-                                        tracksDistance={exercise.tracksDistance}
-                                        plannedReps={exercise.targetReps}
-                                        plannedWeightKg={
-                                            exercise.targetWeightKg
-                                        }
-                                        plannedDurationSeconds={
-                                            exercise.targetDurationSeconds
-                                        }
-                                        plannedDistanceMeters={
-                                            exercise.targetDistanceMeters
-                                        }
-                                    />
-                                ),
-                            )}
-                        </div>
-                    </div>
-                ))}
-
-                <button
-                    type="submit"
-                    className="border rounded px-3 py-2 self-start"
-                >
-                    Save
-                </button>
-            </form>
-        </main>
-    );
+  return (
+    <main className="mx-auto max-w-xl px-6 py-12">
+      <section className="mt-6">
+        <div className="mt-2">
+          <LogBuilder exercises={exerciseOptions} workouts={workoutOptions} />
+        </div>
+      </section>
+    </main>
+  );
 }

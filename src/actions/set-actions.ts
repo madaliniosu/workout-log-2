@@ -7,6 +7,7 @@ import { getCurrentUserId } from "@/lib/current-user";
 
 const SET_ROW_FIELDS = [
   "exerciseId",
+  "workoutId",
   "setNumber",
   "plannedReps",
   "reps",
@@ -22,7 +23,7 @@ const SET_ROW_FIELDS = [
 // input per field, all sharing that field's name, so formData.getAll("reps")
 // returns one value per row across the WHOLE save (every exercise's rows
 // combined), in render order. Zipping the parallel arrays back together by
-// index recovers each row intact, exerciseId included.
+// index recovers each row intact, exerciseId and workoutId included.
 function parseSetRows(formData: FormData) {
   const columns = Object.fromEntries(
     SET_ROW_FIELDS.map((field) => [field, formData.getAll(field)])
@@ -37,39 +38,30 @@ function parseSetRows(formData: FormData) {
   );
 }
 
-// Buckets the flat row list by exerciseId — logSets() wants sets grouped
-// per exercise, not one flat list, since it needs to know which exercise
-// each set belongs to independent of the shared session_id/performed_at.
+// Buckets the flat row list by (exerciseId, workoutId) — logSets() wants
+// sets grouped per exercise-entry, not one flat list. Grouping on the pair
+// (not just exerciseId) keeps an ad-hoc add of an exercise separate from
+// that same exercise arriving as part of a workout, in case both end up in
+// one save.
 function groupByExercise(rows: ReturnType<typeof parseSetRows>) {
-  const groups = new Map<string, LogSetInput[]>();
-  for (const { exerciseId, ...set } of rows) {
-    const existing = groups.get(exerciseId) ?? [];
-    existing.push(set);
-    groups.set(exerciseId, existing);
+  const groups = new Map<string, { exerciseId: string; workoutId: string | null; sets: LogSetInput[] }>();
+  for (const { exerciseId, workoutId, ...set } of rows) {
+    const key = `${exerciseId}::${workoutId ?? ""}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.sets.push(set);
+    } else {
+      groups.set(key, { exerciseId, workoutId, sets: [set] });
+    }
   }
-  return Array.from(groups, ([exerciseId, sets]) => ({ exerciseId, sets }));
+  return Array.from(groups.values());
 }
 
-// Ad-hoc logging: no bound exerciseId anymore — every row already carries
-// its own exerciseId (see SetRow), so this now works for one exercise or
-// several without changing signature.
 export async function logSetsAction(formData: FormData) {
   const rows = parseSetRows(formData);
   const userId = await getCurrentUserId();
 
-  await logSets({ userId, workoutId: null, exerciseSets: groupByExercise(rows) });
+  await logSets({ userId, exerciseSets: groupByExercise(rows) });
 
-  redirect("/");
-}
-
-// Workout-based logging: same row parsing, just workoutId is set instead
-// of null. Bound to a specific workoutId via .bind(null, workout.id) where
-// the form is rendered.
-export async function logWorkoutSetsAction(workoutId: string, formData: FormData) {
-  const rows = parseSetRows(formData);
-  const userId = await getCurrentUserId();
-
-  await logSets({ userId, workoutId, exerciseSets: groupByExercise(rows) });
-
-  redirect("/");
+  redirect("/log");
 }

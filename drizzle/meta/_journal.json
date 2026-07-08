@@ -29,6 +29,13 @@
       "when": 1783332469039,
       "tag": "0003_regular_siren",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783424235613,
+      "tag": "0004_lumpy_namora",
+      "breakpoints": true
     }
   ]
 }

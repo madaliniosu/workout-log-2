@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { Calendar, Dumbbell, BarChart3 } from "lucide-react";
 
 const links = [
-  { href: "/", label: "Log", icon: Calendar, activeWhen: (path: string) => path === "/" || path.startsWith("/log") },
-  { href: "/plan", label: "Plan", icon: Dumbbell, activeWhen: (path: string) => path.startsWith("/plan") },
+  { href: "/log", label: "Log", icon: Calendar, activeWhen: (path: string) => path.startsWith("/log") },
+  { href: "/workouts", label: "Workouts", icon: Dumbbell, activeWhen: (path: string) => path.startsWith("/workouts") },
   { href: "/analyze", label: "Analyze", icon: BarChart3, activeWhen: (path: string) => path.startsWith("/analyze") },
 ];
 

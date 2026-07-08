@@ -2,18 +2,59 @@
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import type { TracksFlags } from "@/lib/format-set";
 
-type ExerciseOption = { id: string; name: string };
+export type ExerciseOption = TracksFlags & {
+  id: string;
+  name: string;
+  targetReps: number | null;
+  targetWeightKg: number | null;
+  targetDurationSeconds: number | null;
+  targetDistanceMeters: number | null;
+};
 
-type Card = {
+export type InitialCard = TracksFlags & {
+  exerciseId: string;
+  exerciseName: string;
+  count: number;
+  targetReps: number | null;
+  targetWeightKg: number | null;
+  targetDurationSeconds: number | null;
+  targetDistanceMeters: number | null;
+};
+
+// Target values are strings while editing (they're controlled inputs);
+// the Server Action's Zod schema turns them back into numbers on submit.
+type Card = TracksFlags & {
   key: string;
   exerciseId: string;
   exerciseName: string;
   count: number;
+  targetReps: string;
+  targetWeightKg: string;
+  targetDurationSeconds: string;
+  targetDistanceMeters: string;
+};
+
+const noTracks: TracksFlags = {
+  tracksReps: false,
+  tracksWeight: false,
+  tracksDuration: false,
+  tracksDistance: false,
 };
 
 function createCard(initialCount: number): Card {
-  return { key: crypto.randomUUID(), exerciseId: "", exerciseName: "", count: initialCount };
+  return {
+    key: crypto.randomUUID(),
+    exerciseId: "",
+    exerciseName: "",
+    count: initialCount,
+    ...noTracks,
+    targetReps: "",
+    targetWeightKg: "",
+    targetDurationSeconds: "",
+    targetDistanceMeters: "",
+  };
 }
 
 export function ExerciseListBuilder({
@@ -27,11 +68,18 @@ export function ExerciseListBuilder({
   countFieldName: string;
   countLabel?: string;
   initialCount?: number;
-  initialCards?: { exerciseId: string; exerciseName: string; count: number }[];
+  initialCards?: InitialCard[];
 }) {
   const [cards, setCards] = useState<Card[]>(() =>
     initialCards && initialCards.length > 0
-      ? initialCards.map((card) => ({ key: crypto.randomUUID(), ...card }))
+      ? initialCards.map((card) => ({
+          key: crypto.randomUUID(),
+          ...card,
+          targetReps: card.targetReps?.toString() ?? "",
+          targetWeightKg: card.targetWeightKg?.toString() ?? "",
+          targetDurationSeconds: card.targetDurationSeconds?.toString() ?? "",
+          targetDistanceMeters: card.targetDistanceMeters?.toString() ?? "",
+        }))
       : [createCard(initialCount)]
   );
 
@@ -57,7 +105,18 @@ export function ExerciseListBuilder({
               value={card.exerciseId}
               displayValue={card.exerciseName}
               onSelect={(exercise) =>
-                updateCard(card.key, { exerciseId: exercise.id, exerciseName: exercise.name })
+                updateCard(card.key, {
+                  exerciseId: exercise.id,
+                  exerciseName: exercise.name,
+                  tracksReps: exercise.tracksReps,
+                  tracksWeight: exercise.tracksWeight,
+                  tracksDuration: exercise.tracksDuration,
+                  tracksDistance: exercise.tracksDistance,
+                  targetReps: exercise.targetReps?.toString() ?? "",
+                  targetWeightKg: exercise.targetWeightKg?.toString() ?? "",
+                  targetDurationSeconds: exercise.targetDurationSeconds?.toString() ?? "",
+                  targetDistanceMeters: exercise.targetDistanceMeters?.toString() ?? "",
+                })
               }
             />
 
@@ -78,6 +137,48 @@ export function ExerciseListBuilder({
               <Trash2 size={18} strokeWidth={2} />
             </button>
           </div>
+
+          {/* One field per metric, always submitted: visible when the
+              exercise tracks that metric, an empty hidden input when not.
+              The hidden inputs keep the Server Action's parallel
+              formData.getAll() arrays aligned across cards — dropping them
+              would shift every later card's values onto the wrong slot.
+              These edit the exercise's own target_* (shared across all
+              workouts), not a per-workout override — see schema.ts. */}
+          <div className="mt-4 flex flex-wrap gap-4">
+            <TargetField
+              shown={card.tracksReps}
+              name="targetReps"
+              label="Target reps"
+              step={1}
+              value={card.targetReps}
+              onChange={(value) => updateCard(card.key, { targetReps: value })}
+            />
+            <TargetField
+              shown={card.tracksWeight}
+              name="targetWeightKg"
+              label="Target weight (kg)"
+              step="any"
+              value={card.targetWeightKg}
+              onChange={(value) => updateCard(card.key, { targetWeightKg: value })}
+            />
+            <TargetField
+              shown={card.tracksDuration}
+              name="targetDurationSeconds"
+              label="Target duration (s)"
+              step={1}
+              value={card.targetDurationSeconds}
+              onChange={(value) => updateCard(card.key, { targetDurationSeconds: value })}
+            />
+            <TargetField
+              shown={card.tracksDistance}
+              name="targetDistanceMeters"
+              label="Target distance (m)"
+              step="any"
+              value={card.targetDistanceMeters}
+              onChange={(value) => updateCard(card.key, { targetDistanceMeters: value })}
+            />
+          </div>
         </fieldset>
       ))}
 
@@ -92,6 +193,42 @@ export function ExerciseListBuilder({
     </div>
   );
 }
+
+function TargetField({
+  shown,
+  name,
+  label,
+  step,
+  value,
+  onChange,
+}: {
+  shown: boolean;
+  name: string;
+  label: string;
+  step: number | "any";
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  if (!shown) {
+    return <input type="hidden" name={name} value="" />;
+  }
+
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="font-heading text-xs font-semibold text-muted">{label}</span>
+      <input
+        type="number"
+        name={name}
+        min={0}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-11 w-32 rounded-xl border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+      />
+    </label>
+  );
+}
+
 
 function ExerciseCombobox({
   exercises,

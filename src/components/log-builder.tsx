@@ -107,7 +107,7 @@ export function LogBuilder({
                     {entries.map((entry) => (
                         <div key={entry.key}>
                             <div className="flex items-center justify-between">
-                                <h2 className="font-heading text-lg font-semibold text-foreground">
+                                <h2 className="font-heading text-lg font-semibold text-text">
                                     {entry.exerciseName}
                                     {entry.workoutName && (
                                         <span className="ml-2 text-xs font-normal text-muted">
@@ -151,7 +151,7 @@ export function LogBuilder({
 
                     <button
                         type="submit"
-                        className="self-start rounded-xl bg-accent px-4 py-2 font-heading text-sm font-semibold text-foreground"
+                        className="self-start rounded-xl bg-accent px-4 py-2 font-heading text-sm font-semibold text-text"
                     >
                         Save
                     </button>

@@ -14,7 +14,7 @@ export function EditWorkoutModal({
   defaultValues: WorkoutFormValues;
 }) {
   return (
-    <Modal trigger="Edit" triggerClassName="text-sm text-muted hover:text-foreground" title="Edit Workout">
+    <Modal trigger="Edit" triggerClassName="text-sm text-muted hover:text-text" title="Edit Workout">
       <WorkoutForm
         action={updateWorkoutAction.bind(null, workoutId)}
         exercises={exercises}

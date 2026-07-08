@@ -95,7 +95,7 @@ export function ExerciseListBuilder({
     <div className="flex flex-col gap-4">
       {cards.map((card, i) => (
         <fieldset key={card.key} className="rounded-xl border border-border bg-white p-4">
-          <legend className="px-1 font-heading text-sm font-semibold text-foreground">
+          <legend className="px-1 font-heading text-sm font-semibold text-text">
             Exercise {i + 1}
           </legend>
 
@@ -185,7 +185,7 @@ export function ExerciseListBuilder({
       <button
         type="button"
         onClick={() => setCards((prev) => [...prev, createCard(initialCount)])}
-        className="flex w-fit items-center gap-2 rounded-xl border border-border px-4 py-2 font-heading text-sm font-semibold text-foreground hover:bg-white"
+        className="flex w-fit items-center gap-2 rounded-xl border border-border px-4 py-2 font-heading text-sm font-semibold text-text hover:bg-white"
       >
         <Plus size={16} strokeWidth={2} />
         Add exercise
@@ -223,7 +223,7 @@ function TargetField({
         step={step}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 w-32 rounded-xl border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+        className="h-11 w-32 rounded-xl border border-border px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
       />
     </label>
   );
@@ -275,7 +275,7 @@ function ExerciseCombobox({
           }, 150);
         }}
         placeholder="Search exercises..."
-        className="h-11 w-56 rounded-xl border border-border px-4 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+        className="h-11 w-56 rounded-xl border border-border px-4 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
       />
 
       {isOpen && (
@@ -291,7 +291,7 @@ function ExerciseCombobox({
                   setQuery(exercise.name);
                   setIsOpen(false);
                 }}
-                className="block w-full px-3 py-2 text-left text-sm text-foreground hover:bg-background"
+                className="block w-full px-3 py-2 text-left text-sm text-text hover:bg-background"
               >
                 {exercise.name}
               </button>
@@ -321,16 +321,16 @@ function SetsStepper({
         <button
           type="button"
           onClick={() => onChange(Math.max(1, value - 1))}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-foreground hover:bg-background"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text hover:bg-background"
         >
           −
         </button>
         <input type="hidden" name={name} value={value} />
-        <span className="w-6 text-center font-heading text-sm font-semibold text-foreground">{value}</span>
+        <span className="w-6 text-center font-heading text-sm font-semibold text-text">{value}</span>
         <button
           type="button"
           onClick={() => onChange(value + 1)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-foreground hover:bg-background"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text hover:bg-background"
         >
           +
         </button>

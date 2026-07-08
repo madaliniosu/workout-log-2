@@ -51,14 +51,14 @@ export function Modal({
                     className="w-full max-w-lg rounded-xl border border-border bg-white"
                 >
                     <div className="flex items-center justify-between border-b border-border p-4">
-                        <h2 className="font-heading text-lg font-semibold text-foreground">
+                        <h2 className="font-heading text-lg font-semibold text-text">
                             {title}
                         </h2>
                         <button
                             type="button"
                             onClick={close}
                             aria-label="Close"
-                            className="text-muted hover:text-foreground"
+                            className="text-muted hover:text-text"
                         >
                             <X size={20} />
                         </button>

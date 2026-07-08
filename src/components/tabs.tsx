@@ -23,7 +23,7 @@ export function Tabs({ tabs }: { tabs: Tab[] }) {
             type="button"
             onClick={() => setActiveIndex(i)}
             className={`-mb-px border-b-2 px-4 py-2 font-heading text-sm font-semibold ${
-              i === activeIndex ? "border-accent text-foreground" : "border-transparent text-muted hover:text-foreground"
+              i === activeIndex ? "border-accent text-text" : "border-transparent text-muted hover:text-text"
             }`}
           >
             {tab.label}

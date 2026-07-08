@@ -145,7 +145,7 @@ export function ExerciseForm({
 
       <button
         type="submit"
-        className="mt-2 self-end rounded-xl bg-accent px-4 py-2 font-heading text-sm font-semibold text-foreground"
+        className="mt-2 self-end rounded-xl bg-accent px-4 py-2 font-heading text-sm font-semibold text-text"
       >
         {submitLabel}
       </button>

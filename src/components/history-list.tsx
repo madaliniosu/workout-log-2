@@ -13,7 +13,7 @@ export function HistoryList({ sessions }: { sessions: LoggedSession[] }) {
                     key={session.sessionId}
                     className="rounded-xl border border-border bg-white p-4"
                 >
-                    <p className="font-heading text-sm font-semibold text-foreground">
+                    <p className="font-heading text-sm font-semibold text-text">
                         {session.performedAtLabel}
                     </p>
 
@@ -22,7 +22,7 @@ export function HistoryList({ sessions }: { sessions: LoggedSession[] }) {
                             <div
                                 key={`${exercise.exerciseId}-${exercise.workoutId ?? "adhoc"}-${i}`}
                             >
-                                <p className="text-sm font-medium text-foreground">
+                                <p className="text-sm font-medium text-text">
                                     {exercise.exerciseName}
                                     {exercise.workoutName && (
                                         <span className="ml-2 text-xs font-normal text-muted">

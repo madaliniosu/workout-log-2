@@ -80,7 +80,7 @@ export function StartWorkoutModal({
   return (
     <Modal
       trigger="Start workout"
-      triggerClassName="rounded-xl border border-border px-4 py-2 font-heading text-sm font-semibold text-foreground hover:bg-white"
+      triggerClassName="rounded-xl border border-border px-4 py-2 font-heading text-sm font-semibold text-text hover:bg-white"
       title="Start Workout"
       onClose={reset}
     >
@@ -118,7 +118,7 @@ export function StartWorkoutModal({
         ) : (
           <>
             <div className="flex items-center justify-between">
-              <p className="font-heading text-sm font-semibold text-foreground">{selected.name}</p>
+              <p className="font-heading text-sm font-semibold text-text">{selected.name}</p>
               <button type="button" onClick={() => setSelected(null)} className="text-xs text-muted hover:underline">
                 Change
               </button>
@@ -132,7 +132,7 @@ export function StartWorkoutModal({
                 step={1}
                 value={sets}
                 onChange={(e) => setSets(Math.max(1, Number(e.target.value)))}
-                className="h-11 w-24 rounded-xl border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+                className="h-11 w-24 rounded-xl border border-border px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </label>
 
@@ -145,7 +145,7 @@ export function StartWorkoutModal({
                   step={1}
                   value={plannedReps}
                   onChange={(e) => setPlannedReps(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="h-11 w-full rounded-xl border border-border px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 />
               </label>
             )}
@@ -159,7 +159,7 @@ export function StartWorkoutModal({
                   step="any"
                   value={plannedWeightKg}
                   onChange={(e) => setPlannedWeightKg(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="h-11 w-full rounded-xl border border-border px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 />
               </label>
             )}
@@ -173,7 +173,7 @@ export function StartWorkoutModal({
                   step={1}
                   value={plannedDurationSeconds}
                   onChange={(e) => setPlannedDurationSeconds(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="h-11 w-full rounded-xl border border-border px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 />
               </label>
             )}
@@ -187,14 +187,14 @@ export function StartWorkoutModal({
                   step="any"
                   value={plannedDistanceMeters}
                   onChange={(e) => setPlannedDistanceMeters(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="h-11 w-full rounded-xl border border-border px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
                 />
               </label>
             )}
 
             <button
               type="submit"
-              className="self-end rounded-xl bg-accent px-4 py-2 font-heading text-sm font-semibold text-foreground"
+              className="self-end rounded-xl bg-accent px-4 py-2 font-heading text-sm font-semibold text-text"
             >
               + Add
             </button>

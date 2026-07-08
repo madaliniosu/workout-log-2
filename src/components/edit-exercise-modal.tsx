@@ -12,7 +12,7 @@ export function EditExerciseModal({
   filterOptions,
   usage,
   trigger = "Edit",
-  triggerClassName = "text-sm text-muted hover:text-foreground",
+  triggerClassName = "text-sm text-muted hover:text-text",
 }: {
   exerciseId: string;
   defaultValues: ExerciseFormValues;

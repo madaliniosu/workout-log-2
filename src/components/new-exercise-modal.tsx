@@ -67,7 +67,7 @@ export function NewExerciseModal({
         ) : (
           recent.length > 0 && (
             <div>
-              <h3 className="font-heading text-sm font-semibold text-foreground">Recent</h3>
+              <h3 className="font-heading text-sm font-semibold text-text">Recent</h3>
               <ul className="mt-1 flex flex-col divide-y divide-border">
                 {recent.map((exercise) => (
                   <ExerciseRow key={exercise.id} exercise={exercise} onSelect={select} />
@@ -80,7 +80,7 @@ export function NewExerciseModal({
         {prefill !== null && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted">
-              Prefilled from <span className="font-medium text-foreground">{prefill.name}</span>
+              Prefilled from <span className="font-medium text-text">{prefill.name}</span>
             </span>
             <button type="button" onClick={() => setPrefill(null)} className="text-xs underline">
               Clear form
@@ -113,7 +113,7 @@ function ExerciseRow({ exercise, onSelect }: { exercise: LibraryExercise; onSele
         onClick={() => onSelect(exercise)}
         className="flex w-full items-center justify-between py-2 text-left hover:bg-background"
       >
-        <span className="text-sm text-foreground">{exercise.name}</span>
+        <span className="text-sm text-text">{exercise.name}</span>
         <span className="text-xs text-muted">{exercise.category}</span>
       </button>
     </li>

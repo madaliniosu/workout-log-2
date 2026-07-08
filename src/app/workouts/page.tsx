@@ -73,7 +73,7 @@ export default async function WorkoutsPage() {
                                             >
                                                 <div className="flex items-start justify-between">
                                                     <div>
-                                                        <h3 className="font-heading text-base font-semibold text-foreground">
+                                                        <h3 className="font-heading text-base font-semibold text-text">
                                                             {workout.name}
                                                         </h3>
                                                         {workout.notes && (

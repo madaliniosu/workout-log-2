@@ -16,6 +16,10 @@ import { NewWorkoutModal } from "@/components/new-workout-modal";
 import { EditWorkoutModal } from "@/components/edit-workout-modal";
 import { restoreExerciseAction } from "@/actions/exercise-actions";
 
+// Every render reads live per-user data from Postgres — a build-time
+// static snapshot is never correct here.
+export const dynamic = "force-dynamic";
+
 export default async function WorkoutsPage() {
     const userId = await getCurrentUserId();
 

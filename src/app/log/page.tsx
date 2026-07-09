@@ -3,6 +3,10 @@ import { getWorkoutsWithSlots } from "@/db/queries/workouts";
 import { getCurrentUserId } from "@/lib/current-user";
 import { LogBuilder, type LogExerciseOption, type LogWorkoutOption } from "@/components/log-builder";
 
+// Every render reads live per-user data from Postgres — a build-time
+// static snapshot is never correct here.
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const userId = await getCurrentUserId();
 

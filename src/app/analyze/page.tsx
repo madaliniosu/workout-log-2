@@ -4,6 +4,10 @@ import { Tabs } from "@/components/tabs";
 import { HistoryList } from "@/components/history-list";
 import { ProgressExplorer } from "@/components/progress-explorer";
 
+// Every render reads live per-user data from Postgres — a build-time
+// static snapshot is never correct here.
+export const dynamic = "force-dynamic";
+
 export default async function AnalyzePage() {
   const userId = await getCurrentUserId();
   const rows = await getLoggedSetRows(userId);

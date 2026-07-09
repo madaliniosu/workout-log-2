@@ -103,10 +103,8 @@ export function ProgressExplorer({ histories }: { histories: ExerciseHistory[] }
       </ul>
 
       <div className="flex-1">
-        <h3 className="font-heading text-lg font-semibold text-text">{selected.exerciseName}</h3>
-
         {visibleCharts.length > 0 ? (
-          <div className="mt-3 grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             {visibleCharts.map((chart) => (
               <ProgressChart key={chart.title} title={chart.title} unit={chart.unit} data={chart.data} />
             ))}
@@ -116,15 +114,6 @@ export function ProgressExplorer({ histories }: { histories: ExerciseHistory[] }
             Log this exercise on at least two days and trend charts will appear here.
           </p>
         )}
-
-        <h4 className="mt-6 font-heading text-sm font-semibold text-text">Logged sets</h4>
-        <ul className="mt-2 flex flex-col gap-1">
-          {selected.entries.map((entry, i) => (
-            <li key={i} className="text-sm text-muted">
-              {entry.performedAtLabel} — Set {entry.setNumber}: {formatSetMetrics(entry, selected)}
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );

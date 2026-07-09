@@ -94,7 +94,7 @@ export function ExerciseListBuilder({
   return (
     <div className="flex flex-col gap-4">
       {cards.map((card, i) => (
-        <fieldset key={card.key} className="rounded-xl border border-border bg-white p-4">
+        <fieldset key={card.key} className="rounded-xl border border-border bg-surface p-4">
           <legend className="px-1 font-heading text-sm font-semibold text-foreground">
             Exercise {i + 1}
           </legend>
@@ -185,7 +185,7 @@ export function ExerciseListBuilder({
       <button
         type="button"
         onClick={() => setCards((prev) => [...prev, createCard(initialCount)])}
-        className="flex w-fit items-center gap-2 rounded-xl border border-border px-4 py-2 font-heading text-sm font-semibold text-foreground hover:bg-white"
+        className="flex w-fit items-center gap-2 rounded-xl border border-border px-4 py-2 font-heading text-sm font-semibold text-foreground hover:bg-surface"
       >
         <Plus size={16} strokeWidth={2} />
         Add exercise
@@ -279,7 +279,7 @@ function ExerciseCombobox({
       />
 
       {isOpen && (
-        <ul className="absolute top-full z-10 mt-1 max-h-56 w-56 overflow-auto rounded-xl border border-border bg-white shadow-lg">
+        <ul className="absolute top-full z-10 mt-1 max-h-56 w-56 overflow-auto rounded-xl border border-border bg-surface shadow-lg">
           {filtered.length === 0 && <li className="px-3 py-2 text-sm text-muted">No matches</li>}
           {filtered.map((exercise) => (
             <li key={exercise.id}>

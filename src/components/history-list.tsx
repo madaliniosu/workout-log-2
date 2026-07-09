@@ -11,7 +11,7 @@ export function HistoryList({ sessions }: { sessions: LoggedSession[] }) {
             {sessions.map((session) => (
                 <div
                     key={session.sessionId}
-                    className="rounded-xl border border-border bg-white p-4"
+                    className="rounded-xl border border-border bg-surface p-4"
                 >
                     <p className="font-heading text-sm font-semibold text-foreground">
                         {session.performedAtLabel}

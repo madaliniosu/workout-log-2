@@ -33,11 +33,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${rethinkSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <div className="flex flex-1">
+        <div className="flex flex-1 flex-col md:flex-row bg-surface">
           <SideNav />
-          <main className="flex-1 bg-background border-l border-border p-8">{children}</main>
+          <main className="flex-1 bg-background border-t border-border p-4 md:border-t-0 md:border-l sm:p-8">
+            {children}
+          </main>
         </div>
       </body>
+
     </html>
   );
 }

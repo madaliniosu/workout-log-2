@@ -48,7 +48,7 @@ export function Modal({
             >
                 <div
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-lg rounded-xl border border-border bg-white"
+                    className="w-full max-w-lg rounded-xl border border-border bg-surface"
                 >
                     <div className="flex items-center justify-between border-b border-border p-4">
                         <h2 className="font-heading text-lg font-semibold text-foreground">

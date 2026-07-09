@@ -15,11 +15,10 @@ export type ChartPoint = { label: string; value: number };
 // Chart chrome: marks carry the series color; every piece of text stays in
 // ink/muted tokens. Single-series charts get no legend — the card title
 // names the series.
-const SERIES = "#2a78d6";
-const GRID = "#e1e0d9";
-const AXIS = "#c3c2b7";
-const MUTED = "#898781";
-
+const SERIES = "var(--chart-series)";
+const GRID = "var(--border)";
+const AXIS = "var(--border)";
+const MUTED = "var(--muted)";
 function ChartTooltip({
   active,
   payload,
@@ -35,7 +34,7 @@ function ChartTooltip({
   if (!active || !payload || payload.length === 0) return null;
   const point = payload[0];
   return (
-    <div className="rounded-lg border border-border bg-white px-3 py-2 shadow-sm">
+    <div className="rounded-lg border border-border bg-surface px-3 py-2 shadow-sm">
       <p className="text-sm font-semibold text-text">
         {point.value} {unit}
       </p>
@@ -54,7 +53,7 @@ export function ProgressChart({
   data: ChartPoint[];
 }) {
   return (
-    <div className="rounded-xl border border-border bg-white p-4">
+    <div className="rounded-xl border border-border bg-surface p-4">
       <h4 className="font-heading text-sm font-semibold text-text">{title}</h4>
       <div className="mt-3">
         <ResponsiveContainer width="100%" height={200}>

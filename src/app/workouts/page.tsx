@@ -73,7 +73,7 @@ export default async function WorkoutsPage() {
                                         {workoutsWithSlots.map((workout) => (
                                             <li
                                                 key={workout.id}
-                                                className="rounded-xl border border-border bg-white p-4"
+                                                className="rounded-xl border border-border bg-surface p-4"
                                             >
                                                 <div className="flex items-start justify-between">
                                                     <div>
@@ -229,7 +229,7 @@ export default async function WorkoutsPage() {
                                         />
                                     </div>
 
-                                    <p className="mt-4 text-sm text-zinc-500">
+                                    <p className="mt-4 text-sm text-muted">
                                         {userExercises.length} exercise
                                         {userExercises.length === 1 ? "" : "s"}
                                     </p>
@@ -279,7 +279,7 @@ export default async function WorkoutsPage() {
                                                             <span>
                                                                 {exercise.name}
                                                             </span>
-                                                            <span className="text-zinc-500">
+                                                            <span className="text-muted">
                                                                 {
                                                                     exercise.category
                                                                 }

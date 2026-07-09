@@ -80,7 +80,7 @@ export function StartWorkoutModal({
   return (
     <Modal
       trigger="Start workout"
-      triggerClassName="rounded-xl border border-border px-4 py-2 font-heading text-sm font-semibold text-foreground hover:bg-white"
+      triggerClassName="rounded-xl border border-border px-4 py-2 font-heading text-sm font-semibold text-foreground hover:bg-surface"
       title="Start Workout"
       onClose={reset}
     >

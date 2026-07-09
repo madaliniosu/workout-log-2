@@ -101,6 +101,7 @@ export function LogBuilder({
                     src={justDoIt}
                     alt="Just do it!"
                     className="w-240 rounded-xl"
+                    loading="eager"
                 />
             ) : (
                 <form action={logSetsAction} className="flex flex-col gap-8">

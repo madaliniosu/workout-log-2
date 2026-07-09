@@ -41,11 +41,11 @@ export function SetRow({
         {tracksReps && (
           <>
             <label className="flex flex-col gap-1">
-              <span className="text-xs text-zinc-500">Planned reps</span>
+              <span className="text-xs text-muted">Planned reps</span>
               <input name="plannedReps" type="number" min={0} step={1} defaultValue={plannedReps ?? ""} className="border rounded px-2 py-1" />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-xs text-zinc-500">Reps</span>
+              <span className="text-xs text-muted">Reps</span>
               <input name="reps" type="number" min={0} step={1} className="border rounded px-2 py-1" />
             </label>
           </>
@@ -54,11 +54,11 @@ export function SetRow({
         {tracksWeight && (
           <>
             <label className="flex flex-col gap-1">
-              <span className="text-xs text-zinc-500">Planned weight (kg)</span>
+              <span className="text-xs text-muted">Planned weight (kg)</span>
               <input name="plannedWeightKg" type="number" min={0} step="any" defaultValue={plannedWeightKg ?? ""} className="border rounded px-2 py-1" />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-xs text-zinc-500">Weight (kg)</span>
+              <span className="text-xs text-muted">Weight (kg)</span>
               <input name="weightKg" type="number" min={0} step="any" className="border rounded px-2 py-1" />
             </label>
           </>
@@ -67,11 +67,11 @@ export function SetRow({
         {tracksDuration && (
           <>
             <label className="flex flex-col gap-1">
-              <span className="text-xs text-zinc-500">Planned duration (s)</span>
+              <span className="text-xs text-muted">Planned duration (s)</span>
               <input name="plannedDurationSeconds" type="number" min={0} step={1} defaultValue={plannedDurationSeconds ?? ""} className="border rounded px-2 py-1" />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-xs text-zinc-500">Duration (s)</span>
+              <span className="text-xs text-muted">Duration (s)</span>
               <input name="durationSeconds" type="number" min={0} step={1} className="border rounded px-2 py-1" />
             </label>
           </>
@@ -80,11 +80,11 @@ export function SetRow({
         {tracksDistance && (
           <>
             <label className="flex flex-col gap-1">
-              <span className="text-xs text-zinc-500">Planned distance (m)</span>
+              <span className="text-xs text-muted">Planned distance (m)</span>
               <input name="plannedDistanceMeters" type="number" min={0} step="any" defaultValue={plannedDistanceMeters ?? ""} className="border rounded px-2 py-1" />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-xs text-zinc-500">Distance (m)</span>
+              <span className="text-xs text-muted">Distance (m)</span>
               <input name="distanceMeters" type="number" min={0} step="any" className="border rounded px-2 py-1" />
             </label>
           </>

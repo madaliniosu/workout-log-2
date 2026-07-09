@@ -38,7 +38,7 @@ export function SearchList<T>({
         autoFocus
         className="h-11 w-full rounded-xl border border-border px-4 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
       />
-      <ul className="mt-1 max-h-72 overflow-auto rounded-xl border border-border bg-white">
+      <ul className="mt-1 max-h-72 overflow-auto rounded-xl border border-border bg-surface">
         {filtered.length === 0 && <li className="px-3 py-2 text-sm text-muted">No matches</li>}
         {filtered.map((item, i) => (
           <li key={i}>
